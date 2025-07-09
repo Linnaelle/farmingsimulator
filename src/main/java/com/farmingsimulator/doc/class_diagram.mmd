@@ -1,0 +1,222 @@
+classDiagram
+    class Ferme {
+        -List<Champ> champs
+        -Stockage stockage
+        -GestionnaireEquipement gestionnaireEquipement
+        -List<Usine> usines
+        -double revenus
+        +ajouterChamp(Champ champ)
+        +obtenirRevenusTotal(): double
+        +depenserArgent(double montant): boolean
+        +gagnerArgent(double montant)
+        +acheterEquipement(TypeEquipement type, int quantite): boolean
+        +vendreEquipement(Equipement equipement): double
+        +acheterUsine(TypeUsine type, int quantite): boolean
+        +vendreUsine(Usine usine): double
+        +acheterArticle(TypeArticle type, int quantite): boolean
+    }
+
+    class Champ {
+        -int numero
+        -EtatChamp etat
+        -TypeCulture typeCulture
+        -String groupeLot
+        -boolean fertilise
+        -long tempsDerniereAction
+        +Champ(int numero)
+        +obtenirEtat(): EtatChamp
+        +definirEtat(EtatChamp etat)
+        +obtenirTypeCulture(): TypeCulture
+        +definirTypeCulture(TypeCulture typeCulture)
+        +estFertilise(): boolean
+        +definirFertilise(boolean fertilise)
+        +estPretARecolter(long tempsActuel): boolean
+        +obtenirRendement(): int
+        +obtenirGroupeLot(): String
+        +definirGroupeLot(String groupeLot)
+    }
+
+    class EtatChamp {
+        <<enumeration>>
+        STANDBY
+        LABOURE
+        SEME
+        FERTILISE
+        READY
+    }
+
+    class TypeCulture {
+        <<enumeration>>
+        BLE
+        ORGE
+        AVOINE
+        CANOLA
+        SOJA
+        RAISIN
+        OLIVE
+        PATATE
+        BETTERAVE
+        COTON
+        MAIS
+        TOURNESOL
+        CANNE_A_SUCRE
+        PEUPLIER
+        LEGUMES
+        EPINARD
+        POIS
+        HARICOTS
+        +obtenirRendement(): int
+        +equipementRequis(): List<TypeEquipement>
+    }
+
+    class Stockage {
+        -Map<TypeArticle, Integer> nbArticles
+        -int capaciteMaximale
+        -int capaciteActuelle
+        +ajouterArticle(TypeArticle type, int quantite)
+        +supprimerArticle(TypeArticle type, int quantite): boolean
+        +vendreArticle(TypeArticle type, int quantite): double
+        +quantiteArticle(TypeArticle type): int
+        +espaceSuffisant(int quantite): boolean
+    }
+
+    class TypeArticle {
+        <<enumeration>>
+        BLE
+        ORGE
+        AVOINE
+        CANOLA
+        SOJA
+        RAISIN
+        OLIVE
+        PATATE
+        BETTERAVE
+        COTON
+        MAIS
+        TOURNESOL
+        CANNE_A_SUCRE
+        PEUPLIER
+        LEGUMES
+        EPINARD
+        POIS
+        HARICOTS
+        HUILE
+        PLANCHE
+        WAGON
+        JOUET
+        FARINE
+        SUCRE
+        TISSU
+        VETEMENT
+        GATEAU
+        CHIPS
+        VIN
+        +valeurVente(): double
+        +valeurAchat(): double
+    }
+
+    class GestionnaireEquipement {
+        -Map<TypeEquipement, List<Equipement>> equipementDisponible
+        +obtenirEquipement(TypeEquipement type): Equipement
+        +retournerEquipement(Equipement equipement)
+        +estDisponible(TypeEquipement type): boolean
+        +ajouterEquipement(Equipement equipement)
+        +retirerEquipement(Equipement equipement): boolean
+    }
+
+    class Equipement {
+        -String id
+        -TypeEquipement type
+        -boolean enUtilisation
+        +Equipement(String id, TypeEquipement type)
+        +estEnUtilisation(): boolean
+        +definirEnUtilisation(boolean enUtilisation)
+        +obtenirType(): TypeEquipement
+    }
+
+    class TypeEquipement {
+        <<enumeration>>
+        TRACTEUR
+        REMORQUE
+        MOISSONNEUSE
+        CHARRUE
+        FERTILISATEUR
+        SEMEUSE
+        MOISSONNEUSE_RAISIN
+        MOISSONNEUSE_OLIVE
+        MOISSONNEUSE_PATATE
+        MOISSONNEUSE_BETTERAVE
+        MOISSONNEUSE_COTON
+        MOISSONNEUSE_CANNE_A_SUCRE
+        MOISSONNEUSE_PEUPLIER
+        MOISSONNEUSE_EPINARD
+        MOISSONNEUSE_HARICOTS
+        MOISSONNEUSE_POIS
+        MOISSONNEUSE_LEGUMES
+        PLANTEUSE_ARBRE
+        PLANTEUSE_PATATE
+        PLANTEUSE_CANNE_A_SUCRE
+        PLANTEUSE_LEGUMES
+        SEMI_REMORQUE
+    }
+
+    class Usine {
+        -TypeUsine type
+        -boolean enMarche
+        -Stockage stockage
+        +Usine(TypeUsine type, Stockage stockage)
+        +peutTraiter(): boolean
+        +demarrerTraitement()
+        +traiter(): void
+        +estEnTraitement(): boolean
+    }
+
+    class TypeUsine {
+        <<enumeration>>
+        MOULIN_A_HUILE
+        SCIERIE
+        FABRIQUE_WAGONS
+        USINE_JOUETS
+        MOULIN_A_GRAINS
+        RAFFINERIE_SUCRE
+        FILATURE
+        ATELIER_COUTURE
+        BOULANGERIE
+        USINE_CHIPS
+        CAVE_A_VIN
+        +articleEntrant(): Map<TypeArticle, Integer>
+        +articleSortant(): TypeArticle
+        +obtenirMultiplicateur(): double
+        +obtenirTauxTraitement(): int
+        +prixAchat(): double
+        +prixRevente(): double
+    }
+
+    class Simulateur {
+        -Ferme ferme
+        +Simulateur()
+        +mettreAJour(long tempsPasse)
+        +labourer(int numeroChamp)
+        +semer(int numeroChamp, TypeCulture typeCulture)
+        +fertiliser(int numeroChamp)
+        +recolter(int numeroChamp)
+        +transformer(TypeUsine typeUsine)
+    }
+
+    Ferme "1" -- "0..99" Champ : contient
+    Ferme "1" -- "1" Stockage : possede
+    Ferme "1" -- "1" GestionnaireEquipement : possede
+    Ferme "1" -- "0..*" Usine : contient
+    
+    Champ "1" -- "1" EtatChamp : possede
+    Champ "0..1" -- "0..1" TypeCulture : cultive
+    
+    Stockage "1" -- "0..*" TypeArticle : stocke
+    
+    GestionnaireEquipement "1" -- "0..*" Equipement : gere
+    Equipement "1" -- "1" TypeEquipement : est_de_type
+    
+    Usine "1" -- "1" TypeUsine : est_de_type
+    Usine "1" -- "1" Stockage : utilise
+    
+    Simulateur "1" -- "1" Ferme : gere
