@@ -1,0 +1,22 @@
+{
+  "database": {
+    "path": "data/db.sqlite",
+    "memoryMode": true
+  },
+  "game": {
+    "title": "Farming Simulator",
+    "version": "1.0.0",
+    "windowWidth": 800,
+    "windowHeight": 600,
+    "windowResizable": true,
+    "fullscreen": false,
+    "language": "fr",
+    "volume": 0.7,
+    "autoSave": true,
+    "autoSaveIntervalMinutes": 5
+  },
+  "player": {
+    "defaultName": "Fermier",
+    "startMoney": 1500
+  }
+}
