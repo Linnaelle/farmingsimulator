@@ -76,7 +76,7 @@ public class Config {
         private int startMoney;
 
         public PlayerConfig() {
-            this.defaultName = "Fermier";
+            this.defaultName = "Default player name";
             this.startMoney = 1500;
         }
 
