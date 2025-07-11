@@ -1,0 +1,232 @@
+---
+config:
+  theme: mc
+  look: neo
+  layout: dagre
+---
+classDiagram
+
+class Joueur {
+    -String name
+    -Difficulte difficulte
+    -long tempsJeu
+    -Ferme ferme
+}
+
+class Ferme {
+    -String name
+    -StockPrincipal stockPrincipal
+    -Entrepot entrepot
+    -ReservoirEau reservoirEau
+    -GestionnaireEquipement equipements
+    -double revenu
+    -List~Champ~ champs
+    -List~StructureProduction~ structures
+}
+
+class Stockage {
+    <<abstract>>
+    -Map~String,Integer~ articles
+    -int capaciteMax
+    +ajouter(String article, int quantite) boolean
+    +retirer(String article, int quantite) boolean
+    +getQuantite(String article) int
+    +capaciteLibre() int
+    +peutStocker(String article) boolean*
+}
+
+class StockPrincipal {
+    +peutStocker(String article) boolean
+}
+
+class Entrepot {
+    +peutStocker(String article) boolean
+}
+
+class StructureProduction {
+    <<abstract>>
+    -String type
+    -boolean active
+    -double prixAchat
+    -boolean enPause
+    -int tauxTraitement
+    +demarrer() boolean
+    +arreter()
+    +pauseAutomatique() boolean
+    +consommer(Stockage stockage, String article, int quantite) boolean
+    +produire(long tempsCourant, ReservoirEau reservoir, Stockage stock)*
+}
+
+class Usine {
+    +produire(long tempsCourant, ReservoirEau reservoir, Stockage stock)
+}
+
+class Serre {
+    +produire(long tempsCourant, ReservoirEau reservoir, Stockage stock)
+}
+
+class CatalogueInfo {
+    <<abstract>>
+    +nom String
+    +prixAchat double
+    +prixVente double
+}
+
+class EquipementInfo {
+    +type String
+}
+
+class UsineInfo {
+    +intrantsRequis Map~String,Integer~
+    +multiplicateur double
+    +articleProduit String
+}
+
+class AnimalInfo {
+    +consoEau int
+    +consoHerbe int
+    +stockHerbe int
+    +articlesProduits List~String~
+}
+
+class CultureInfo {
+    +rendement int
+    +needLabour boolean
+    +articleProduit String
+    +equipements List~String~
+}
+
+class Champ {
+    -String name
+    -int numero
+    -String typeCulture
+    -long tempsAction
+    -EtatChamp etat
+    -FermeAnimale fermeAnimale
+    +prixAchat double
+    +recoltable(long tempsCourant) boolean
+    +labourer(long tempsCourant) boolean
+    +semer(String culture, long tempsCourant) boolean
+    +fertiliser(long tempsCourant) boolean
+    +recolter(long tempsCourant) int
+}
+
+class EtatChamp {
+    <<enumeration>>
+    STANDBY
+    LABOURE
+    SEME
+    FERTILISE
+    READY
+}
+
+class FermeAnimale {
+    -String typeAnimal
+    -int capaciteMax
+    -List~Animal~ animaux
+    +addAnimal(Animal animal) boolean
+}
+
+class Animal {
+    -String type
+    -int stockHerbe
+    -boolean vivant
+    -boolean deficit
+}
+
+class ReservoirEau {
+    -int capacite
+    -int quantite
+    +remplir(long tempsCourant)
+}
+
+class GestionnaireEquipement {
+    -Map~String,List<Equipement>~ inventaire
+    +reserver(String type, long duree) Equipement
+    +liberer(Equipement equipement)
+}
+
+class Equipement {
+    -String type
+    -boolean enUtilisation
+    +utiliser(long duree, long tempsCourant)
+}
+
+class Difficulte {
+    -String nom
+    -double goldDepart
+    -double multiplicateurPrixAchat
+    -double multiplicateurPrixVente
+}
+
+class Economie {
+    +getPrixVente(String article) double
+    +getPrixAchat(String article) double
+    +acheterEquipement(Ferme ferme, String type) boolean
+    +acheterAnimal(Ferme ferme, String type, int quantite) boolean
+    +acheterStructure(Ferme ferme, String type) boolean
+    +acheterChamp(Ferme ferme, String type) boolean
+    +acheterCulture(Ferme ferme, String type) boolean
+    +vendreArticle(Ferme ferme, String article, int quantite) double
+    +vendreCulture(Ferme ferme, String culture, int quantite) double
+    +vendreAnimal(Ferme ferme, Animal animal) double
+    +vendreEquipement(Ferme ferme, Equipement equipement) boolean
+}
+
+class Catalogue {
+    +getCultureInfo(String type) CultureInfo
+    +getAnimalInfo(String type) AnimalInfo
+    +getUsineInfo(String type) UsineInfo
+    +getEquipementInfo(String type) EquipementInfo
+    +getArticleInfo(String nom) ArticleInfo
+}
+
+class ArticleInfo {
+    +nom String
+    +categorie String
+    +prixVente double
+}
+
+class Sauvegarde {
+    -String cheminFichier
+    +sauvegarder(Joueur joueur)
+    +charger() Joueur
+    +sauvegardeAutomatique(Joueur joueur)
+}
+
+StockPrincipal --|> Stockage
+Entrepot --|> Stockage
+ReservoirEau --|> Stockage
+Usine --|> StructureProduction
+Serre --|> StructureProduction
+EquipementInfo --|> CatalogueInfo
+UsineInfo --|> CatalogueInfo
+AnimalInfo --|> CatalogueInfo
+CultureInfo --|> CatalogueInfo
+
+Champ --> EtatChamp
+
+Joueur "1" *-- "1" Ferme
+Joueur "1" -- "1" Difficulte
+Joueur "1" -- "1" Economie
+Joueur "1" -- "1" Sauvegarde
+
+Ferme "1" *-- "0..99" Champ
+Ferme "1" *-- "1" StockPrincipal
+Ferme "1" *-- "1" Entrepot
+Ferme "1" *-- "1" ReservoirEau
+Ferme "1" *-- "1" GestionnaireEquipement
+Ferme "1" *-- "0..*" StructureProduction
+
+Champ "1" *-- "0..1" FermeAnimale
+FermeAnimale "1" *-- "0..10" Animal
+GestionnaireEquipement "1" *-- "0..*" Equipement
+
+Catalogue *-- CultureInfo
+Catalogue *-- AnimalInfo
+Catalogue *-- UsineInfo
+Catalogue *-- EquipementInfo
+Catalogue *-- ArticleInfo
+
+Joueur ..> Catalogue
+Economie ..> Catalogue

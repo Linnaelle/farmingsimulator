@@ -1,4 +1,5 @@
 dev\linnaelle\fs\utils\DatabaseManager.class
+dev\linnaelle\fs\service\CatalogueInitializer.class
 dev\linnaelle\fs\utils\ConfigManager.class
 dev\linnaelle\fs\GameApplication.class
 dev\linnaelle\fs\model\Config$DatabaseConfig.class

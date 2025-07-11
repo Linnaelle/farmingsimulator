@@ -1,6 +1,7 @@
 package dev.linnaelle.fs;
 
 import dev.linnaelle.fs.utils.*;
+import dev.linnaelle.fs.service.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -12,6 +13,8 @@ public class GameApplication extends Application {
     public static void main(String[] args) {
         // Initialisation du gestionnaire de base de données
         DatabaseManager.getInstance().initializeDatabase();
+        // Remplissage du catalogue avec les données initiales
+        CatalogueInitializer.initializeCatalogueData();
 
         // Lancement de l'application JavaFX
         launch(args);
