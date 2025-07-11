@@ -15,8 +15,6 @@ public class TestDatabase {
             
             System.out.println("Initialisation de la base de donnees...");
             DatabaseManager.getInstance().initializeDatabase();
-            
-            System.out.println("Insertion des donnees du catalogue...");
             CatalogueInitializer.initializeCatalogueData();
             
             System.out.println("\nVerification des donnees inserees :\n");
