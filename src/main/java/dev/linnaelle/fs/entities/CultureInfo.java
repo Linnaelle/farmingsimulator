@@ -13,8 +13,7 @@ public class CultureInfo {
 
     public CultureInfo() {}
 
-    public CultureInfo(String nom, double prixAchat, double prixVente, int rendement, 
-                      boolean needLabour, String articleProduit, List<String> equipements) {
+    public CultureInfo(String nom, double prixAchat, double prixVente, int rendement, boolean needLabour, String articleProduit, List<String> equipements) {
         this.nom = nom;
         this.prixAchat = prixAchat;
         this.prixVente = prixVente;

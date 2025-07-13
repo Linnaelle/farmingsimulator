@@ -10,8 +10,7 @@ public class UsineInfo {
 
     public UsineInfo() {}
 
-    public UsineInfo(String nom, double prixAchat, double prixVente, String intrantsRequis, 
-                    double multiplicateur, String articleProduit) {
+    public UsineInfo(String nom, double prixAchat, double prixVente, String intrantsRequis, double multiplicateur, String articleProduit) {
         this.nom = nom;
         this.prixAchat = prixAchat;
         this.prixVente = prixVente;

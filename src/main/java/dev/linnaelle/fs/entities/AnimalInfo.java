@@ -13,8 +13,7 @@ public class AnimalInfo {
 
     public AnimalInfo() {}
 
-    public AnimalInfo(String nom, double prixAchat, double prixVente, int consoEau, 
-                     int consoHerbe, int stockHerbe, List<String> articlesProduits) {
+    public AnimalInfo(String nom, double prixAchat, double prixVente, int consoEau, int consoHerbe, int stockHerbe, List<String> articlesProduits) {
         this.nom = nom;
         this.prixAchat = prixAchat;
         this.prixVente = prixVente;
