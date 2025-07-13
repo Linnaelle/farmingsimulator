@@ -103,16 +103,26 @@ public class DatabaseManager {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
+            // Table Difficulte (données de référence)
+            String createDifficulteTable = """
+                CREATE TABLE IF NOT EXISTS Difficulte (
+                    nom TEXT PRIMARY KEY,
+                    goldDepart REAL NOT NULL,
+                    multiplicateurAchat REAL DEFAULT 1.0,
+                    multiplicateurVente REAL DEFAULT 1.0
+                );
+                """;
+            stmt.execute(createDifficulteTable);
+            System.out.println("Table 'Difficulte' créée.");
+
             // Table Joueur
             String createJoueurTable = """
                 CREATE TABLE IF NOT EXISTS Joueur (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     temps_jeu INTEGER DEFAULT 0,
-                    difficulte_nom TEXT NOT NULL,
-                    difficulte_gold_depart REAL NOT NULL,
-                    difficulte_multiplicateur_prix_achat REAL DEFAULT 1.0,
-                    difficulte_multiplicateur_prix_vente REAL DEFAULT 1.0
+                    difficulte TEXT NOT NULL,
+                    FOREIGN KEY (difficulte) REFERENCES Difficulte(nom)
                 );
                 """;
             stmt.execute(createJoueurTable);
@@ -131,18 +141,51 @@ public class DatabaseManager {
             stmt.execute(createFermeTable);
             System.out.println("Table 'Ferme' créée.");
 
-            // Table abstraite Stockage (StockPrincipal, Entrepot, ReservoirEau)
+            // Table abstraite Stockage (classe mère)
             String createStockageTable = """
                 CREATE TABLE IF NOT EXISTS Stockage (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     ferme_id INTEGER NOT NULL,
-                    type_stockage TEXT NOT NULL CHECK (type_stockage IN ('STOCK_PRINCIPAL', 'ENTREPOT', 'RESERVOIR_EAU')),
                     capacite_max INTEGER NOT NULL,
                     FOREIGN KEY (ferme_id) REFERENCES Ferme(id) ON DELETE CASCADE
                 );
                 """;
             stmt.execute(createStockageTable);
             System.out.println("Table 'Stockage' créée.");
+
+            // Table StockPrincipal (hérite de Stockage)
+            String createStockPrincipalTable = """
+                CREATE TABLE IF NOT EXISTS StockPrincipal (
+                    stockage_id INTEGER PRIMARY KEY,
+                    FOREIGN KEY (stockage_id) REFERENCES Stockage(id) ON DELETE CASCADE
+                );
+                """;
+            stmt.execute(createStockPrincipalTable);
+            System.out.println("Table 'StockPrincipal' créée.");
+
+            // Table Entrepot (hérite de Stockage)
+            String createEntrepotTable = """
+                CREATE TABLE IF NOT EXISTS Entrepot (
+                    stockage_id INTEGER PRIMARY KEY,
+                    FOREIGN KEY (stockage_id) REFERENCES Stockage(id) ON DELETE CASCADE
+                );
+                """;
+            stmt.execute(createEntrepotTable);
+            System.out.println("Table 'Entrepot' créée.");
+
+            // Table ReservoirEau (hérite de Stockage)
+            String createReservoirEauTable = """
+                CREATE TABLE IF NOT EXISTS ReservoirEau (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    stockage_id INTEGER,
+                    capacite INTEGER DEFAULT 20000,
+                    quantite INTEGER DEFAULT 0,
+                    dernier_remplissage INTEGER DEFAULT 0,
+                    FOREIGN KEY (stockage_id) REFERENCES Stockage(id) ON DELETE CASCADE
+                );
+                """;
+            stmt.execute(createReservoirEauTable);
+            System.out.println("Table 'ReservoirEau' créée.");
 
             // Table des articles stockés
             String createArticlesStockageTable = """
@@ -226,24 +269,55 @@ public class DatabaseManager {
             stmt.execute(createEquipementTable);
             System.out.println("Table 'Equipement' créée.");
 
-            // Table abstraite StructureProduction (Usine, Serre)
+            // Table abstraite StructureProduction (classe mère)
             String createStructureProductionTable = """
                 CREATE TABLE IF NOT EXISTS StructureProduction (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     ferme_id INTEGER NOT NULL,
-                    type_structure TEXT NOT NULL CHECK (type_structure IN ('USINE', 'SERRE')),
                     type TEXT NOT NULL,
                     active INTEGER DEFAULT 0,
                     prix_achat REAL DEFAULT 0.0,
                     en_pause INTEGER DEFAULT 0,
                     taux_traitement INTEGER DEFAULT 100,
-                    dernier_recolte INTEGER DEFAULT 0,
                     FOREIGN KEY (ferme_id) REFERENCES Ferme(id) ON DELETE CASCADE
                 );
                 """;
             stmt.execute(createStructureProductionTable);
             System.out.println("Table 'StructureProduction' créée.");
 
+            // Table Usine (hérite de StructureProduction)
+            String createUsineTable = """
+                CREATE TABLE IF NOT EXISTS Usine (
+                    structure_id INTEGER PRIMARY KEY,
+                    FOREIGN KEY (structure_id) REFERENCES StructureProduction(id) ON DELETE CASCADE
+                );
+                """;
+            stmt.execute(createUsineTable);
+            System.out.println("Table 'Usine' créée.");
+
+            // Table Serre (hérite de StructureProduction)
+            String createSerreTable = """
+                CREATE TABLE IF NOT EXISTS Serre (
+                    structure_id INTEGER PRIMARY KEY,
+                    dernier_recolte INTEGER DEFAULT 0,
+                    FOREIGN KEY (structure_id) REFERENCES StructureProduction(id) ON DELETE CASCADE
+                );
+                """;
+            stmt.execute(createSerreTable);
+            System.out.println("Table 'Serre' créée.");
+
+            // Table Economie
+            String createEconomieTable = """
+                CREATE TABLE IF NOT EXISTS Economie (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    joueur_id INTEGER NOT NULL,
+                    FOREIGN KEY (joueur_id) REFERENCES Joueur(id) ON DELETE CASCADE
+                );
+                """;
+            stmt.execute(createEconomieTable);
+            System.out.println("Table 'Economie' créée.");
+
+            // Tables du catalogue (données statiques)
             // Table CultureInfo
             String createCultureInfoTable = """
                 CREATE TABLE IF NOT EXISTS CultureInfo (

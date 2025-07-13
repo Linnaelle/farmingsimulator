@@ -1,8 +1,10 @@
 package dev.linnaelle.fs;
 
+import dev.linnaelle.fs.services.*;
 import dev.linnaelle.fs.utils.*;
-import dev.linnaelle.fs.service.*;
 import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 /**
@@ -14,7 +16,7 @@ public class GameApplication extends Application {
         // Initialisation du gestionnaire de base de données
         DatabaseManager.getInstance().initializeDatabase();
         // Remplissage du catalogue avec les données initiales
-        CatalogueInitializer.initializeCatalogueData();
+        DataInitializer.initializeData();
 
         // Lancement de l'application JavaFX
         launch(args);
@@ -33,6 +35,7 @@ public class GameApplication extends Application {
         primaryStage.setWidth(ConfigManager.getWindowWidth());
         primaryStage.setHeight(ConfigManager.getWindowHeight());
         primaryStage.setTitle(ConfigManager.getTitle());
+        primaryStage.setScene(new Scene(new Label("Hello world !"), 1280, 720));
 
         // Affichage de la fenêtre
         primaryStage.show();

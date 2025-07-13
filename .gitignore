@@ -9,6 +9,10 @@
 
 data/
 target/
+test_saves/
+saves/
+data/
+.vscode/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
