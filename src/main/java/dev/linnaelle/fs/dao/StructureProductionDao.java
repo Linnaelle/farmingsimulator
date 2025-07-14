@@ -24,7 +24,7 @@ public class StructureProductionDao {
                  PreparedStatement stmtUsine = conn.prepareStatement(sqlUsine);
                  PreparedStatement stmtLastId = conn.prepareStatement(sqlGetLastId)) {
                 
-                // Insérer dans StructureProduction
+                
                 stmtStructure.setInt(1, usine.getFermeId());
                 stmtStructure.setString(2, usine.getType());
                 stmtStructure.setBoolean(3, usine.isActive());
@@ -38,7 +38,7 @@ public class StructureProductionDao {
                     int structureId = rs.getInt(1);
                     usine.setId(structureId);
                     
-                    // Insérer dans Usine
+                    
                     stmtUsine.setInt(1, structureId);
                     stmtUsine.executeUpdate();
                     
@@ -71,7 +71,7 @@ public class StructureProductionDao {
         try (Connection conn = DatabaseManager.get()) {
             conn.setAutoCommit(false);
             
-            try (PreparedStatement stmtStructure = conn.prepareStatement(sqlStructure, Statement.RETURN_GENERATED_KEYS);
+            try (PreparedStatement stmtStructure = conn.prepareStatement(sqlStructure);
                  PreparedStatement stmtSerre = conn.prepareStatement(sqlSerre);
                  PreparedStatement stmtLastId = conn.prepareStatement(sqlGetLastId)) {
                 
@@ -183,10 +183,10 @@ public class StructureProductionDao {
     public List<StructureProduction> findAllByFermeId(int fermeId) {
         List<StructureProduction> structures = new ArrayList<>();
         
-        // Ajouter toutes les usines
+        
         structures.addAll(findUsinesByFermeId(fermeId));
         
-        // Ajouter toutes les serres
+        
         structures.addAll(findSerresByFermeId(fermeId));
         
         return structures;
@@ -234,7 +234,7 @@ public class StructureProductionDao {
             try (PreparedStatement stmtStructure = conn.prepareStatement(sqlStructure);
                  PreparedStatement stmtSerre = conn.prepareStatement(sqlSerre)) {
                 
-                // Mettre à jour StructureProduction
+                
                 stmtStructure.setString(1, serre.getType());
                 stmtStructure.setBoolean(2, serre.isActive());
                 stmtStructure.setDouble(3, serre.getPrixAchat());
@@ -243,7 +243,7 @@ public class StructureProductionDao {
                 stmtStructure.setInt(6, serre.getId());
                 stmtStructure.executeUpdate();
                 
-                // Mettre à jour Serre
+                
                 stmtSerre.setLong(1, serre.getDernierRecolte());
                 stmtSerre.setInt(2, serre.getId());
                 stmtSerre.executeUpdate();

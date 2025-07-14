@@ -21,7 +21,7 @@ public class EquipementDao {
         String sql = "INSERT INTO Equipement (gestionnaire_id, type, en_utilisation) VALUES (?, ?, ?)";
         
         try (Connection conn = DatabaseManager.get();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, equipement.getGestionnaireId());
             stmt.setString(2, equipement.getType());
@@ -30,11 +30,12 @@ public class EquipementDao {
             int affectedRows = stmt.executeUpdate();
             
             if (affectedRows > 0) {
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    equipement.setId(generatedKeys.getInt(1));
+                try (Statement lastIdStmt = conn.createStatement();
+                    ResultSet rs = lastIdStmt.executeQuery("SELECT last_insert_rowid()")) {
+                    if (rs.next()) {
+                        equipement.setId(rs.getInt(1));
+                    }
                 }
-                return equipement;
             }
             
         } catch (SQLException e) {

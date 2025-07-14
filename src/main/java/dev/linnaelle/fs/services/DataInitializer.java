@@ -5,15 +5,9 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
 
-/**
- * Service responsable de l'initialisation des données du catalogue.
- * Insère les données de base pour les cultures, animaux, équipements, usines et articles.
- */
 public class DataInitializer {
-
     /**
-     * Initialise toutes les données dans la base de données.
-     * Cette méthode doit être appelée après la création des tables.
+     * Initialise les données de la base de données en insérant des informations
      */
     public static void initializeData() {
         try (Connection conn = DatabaseManager.get();
@@ -48,7 +42,15 @@ public class DataInitializer {
             ('plants_pomme_de_terre', 0.2, 0.10, 5000, 1, 'pomme_de_terre', 'tracteur,planteuse_pomme_de_terre,moissonneuse_pomme_de_terre'),
             ('plants_raisin', 2.0, 1.0, 1500, 1, 'raisin', 'tracteur,semeuse,moissonneuse_raisin'),
             ('graines_herbe', 0.1, 0.05, 5000, 0, 'herbe', 'tracteur,semeuse,moissonneuse'),
-            ('plants_cacao', 5.0, 2.5, 1000, 1, 'cacao', 'planteuse_arbre,moissonneuse_arbre');
+            ('plants_cacao', 5.0, 2.5, 1000, 1, 'cacao', 'planteuse_arbre,moissonneuse_arbre'),
+            ('graines_olive', 2.0, 1.0, 1500, 1, 'olive', 'tracteur,planteuse_arbre,moissonneuse_olive'),
+            ('graines_coton', 0.4, 0.20, 750, 1, 'coton', 'tracteur,semeuse,moissonneuse_coton'),
+            ('plants_canne_a_sucre', 1.0, 0.5, 5000, 1, 'canne_a_sucre', 'tracteur,planteuse_canne,moissonneuse_canne_a_sucre'),
+            ('graines_peuplier', 3.0, 1.5, 1500, 1, 'peuplier', 'tracteur,planteuse_arbre,moissonneuse_arbre'),
+            ('graines_legumes', 1.0, 0.5, 2500, 1, 'legumes', 'tracteur,planteuse_legumes,moissonneuse_legumes'),
+            ('graines_epinard', 0.8, 0.4, 3000, 1, 'epinard', 'tracteur,semeuse,moissonneuse_epinard'),
+            ('graines_pois', 1.5, 0.75, 7500, 1, 'pois', 'tracteur,semeuse,moissonneuse_pois'),
+            ('graines_haricots_verts', 1.5, 0.75, 7500, 1, 'haricots_verts', 'tracteur,semeuse,moissonneuse_haricots');
             """;
         stmt.execute(insertCultureData);
         System.out.println("Données CultureInfo insérées.");
@@ -81,7 +83,8 @@ public class DataInitializer {
             ('cave_a_vin', 60000.0, 48000.0, 'raisin:100', 2.0, 'vin'),
             ('usine_fumier', 15000.0, 12000.0, 'fumier:100', 2.0, 'fertilisant'),
             ('laiterie', 30000.0, 24000.0, 'lait:100', 1.0, 'lait_sterilise'),
-            ('chocolaterie', 70000.0, 56000.0, 'cacao:100,sucre:100,lait:100', 2.0, 'chocolat');
+            ('chocolaterie', 70000.0, 56000.0, 'cacao:100,sucre:100,lait:100', 2.0, 'chocolat'),
+            ('serre', 40000.0, 32000.0, 'eau:15', 1.0, 'fraises');
             """;
         stmt.execute(insertUsineData);
         System.out.println("Données UsineInfo insérées.");
@@ -103,6 +106,10 @@ public class DataInitializer {
             ('moissonneuse_coton', 110000.0, 55000.0, 'moissonneuse_coton'),
             ('moissonneuse_canne_a_sucre', 125000.0, 62500.0, 'moissonneuse_canne_a_sucre'),
             ('moissonneuse_arbre', 85000.0, 42500.0, 'moissonneuse_arbre'),
+            ('moissonneuse_epinard', 85000.0, 42500.0, 'moissonneuse_epinard'),
+            ('moissonneuse_haricots', 90000.0, 45000.0, 'moissonneuse_haricots'),
+            ('moissonneuse_pois', 88000.0, 44000.0, 'moissonneuse_pois'),
+            ('moissonneuse_legumes', 95000.0, 47500.0, 'moissonneuse_legumes'),
             ('planteuse_arbre', 25000.0, 12500.0, 'planteuse_arbre'),
             ('planteuse_pomme_de_terre', 30000.0, 15000.0, 'planteuse_pomme_de_terre'),
             ('planteuse_canne_a_sucre', 35000.0, 17500.0, 'planteuse_canne_a_sucre'),
@@ -147,7 +154,15 @@ public class DataInitializer {
             ('lait_sterilise', 'produit_transforme', 2.0),
             ('beurre', 'produit_transforme', 2.0),
             ('chocolat', 'produit_transforme', 4.0),
-            ('fraises', 'fruit', 3.0);
+            ('fraises', 'fruit', 3.0),
+            ('olive', 'fruit', 1.5),
+            ('coton', 'materiau', 1.0),
+            ('canne_a_sucre', 'cereale', 1.0),
+            ('peuplier', 'materiau', 1.5),
+            ('legumes', 'legume', 1.5),
+            ('epinard', 'legume', 2.0),
+            ('pois', 'legume', 3.0),
+            ('haricots_verts', 'legume', 3.0);
             """;
         stmt.execute(insertArticleData);
         System.out.println("Données ArticleInfo insérées.");

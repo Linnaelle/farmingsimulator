@@ -1,5 +1,7 @@
 package dev.linnaelle.fs.entities;
 
+import dev.linnaelle.fs.services.CatalogueService;
+
 public class Champ {
     private int id;
     private int fermeId;
@@ -34,7 +36,7 @@ public class Champ {
             return false;
         }
         
-        // Vérifier si assez de temps s'est écoulé (2 minutes = 120 000 ms)
+        
         return tempsCourant >= (tempsAction + 120000);
     }
 
@@ -48,7 +50,7 @@ public class Champ {
             return false;
         }
         
-        // Action prend 30 secondes
+        
         this.tempsAction = tempsCourant + 30000;
         this.etat = EtatChamp.LABOURE;
         return true;
@@ -96,12 +98,18 @@ public class Champ {
             return 0;
         }
         
-        // TODO: Calculer le rendement via CatalogueDAO
-        // Rendement de base + bonus fertilisation (50%)
-        int rendementBase = 1000; // Par défaut, à récupérer du catalogue
-        int bonus = (etat == EtatChamp.FERTILISE) ? (int)(rendementBase * 0.5) : 0;
+        CultureInfo info = CatalogueService.getInstance().getCultureInfo(this.typeCulture);
+        int rendementBase = 0;
         
-        // Remettre le champ en standby
+        if (info != null) {
+            rendementBase = info.getRendement();
+        } else {
+            System.err.println("Type de culture inconnu: " + this.typeCulture);
+            return rendementBase;
+        }
+
+        int bonus = (etat == EtatChamp.FERTILISE) ? (int)(rendementBase * 0.5) : 0;
+
         this.etat = EtatChamp.STANDBY;
         this.typeCulture = null;
         this.tempsAction = tempsCourant;
@@ -109,7 +117,7 @@ public class Champ {
         return rendementBase + bonus;
     }
 
-    // Getters et Setters
+    
     public int getId() {
         return id;
     }

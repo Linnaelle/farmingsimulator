@@ -1,6 +1,7 @@
 package dev.linnaelle.fs.entities;
 
 import java.util.Map;
+import dev.linnaelle.fs.services.CatalogueService;
 import java.util.HashMap;
 
 public class Animal {
@@ -41,7 +42,7 @@ public class Animal {
             return production;
         }
 
-        // TODO: Récupérer les données de consommation via CatalogueDAO
+        
         int consoEau = getConsoEauParSeconde();
         int consoHerbe = getConsoHerbeParSeconde();
         
@@ -78,51 +79,98 @@ public class Animal {
         return production;
     }
 
-    private int getConsoEauParSeconde() {
-        // TODO: Récupérer via CatalogueDAO
-        switch (type) {
-            case "vache": return 3;
-            case "mouton": return 2;
-            case "poule": return 1;
-            default: return 1;
+    /**
+     * Récupère la consommation d'eau par seconde pour ce type d'animal
+     */
+    public int getConsoEauParSeconde() {
+        AnimalInfo info = CatalogueService.getInstance().getAnimalInfo(this.type);
+        if (info != null) {
+            return info.getConsoEau();
         }
-    }
-
-    private int getConsoHerbeParSeconde() {
-        // TODO: Récupérer via CatalogueDAO
-        switch (type) {
-            case "vache": return 3;
-            case "mouton": return 2;
-            case "poule": return 1;
+        
+        switch (this.type.toLowerCase()) {
+            case "vache": return 3;  
+            case "mouton": return 2; 
+            case "poule": return 1;  
             default: return 1;
         }
     }
 
     /**
-     * Récupère la production de l'animal par seconde.
+     * Récupère la consommation d'herbe par seconde pour ce type d'animal
+     */
+    public int getConsoHerbeParSeconde() {
+        AnimalInfo info = CatalogueService.getInstance().getAnimalInfo(this.type);
+        if (info != null) {
+            return info.getConsoHerbe();
+        }
+        
+        switch (this.type.toLowerCase()) {
+            case "vache": return 3;  
+            case "mouton": return 2; 
+            case "poule": return 1;  
+            default: return 1;
+        }
+    }
+
+    /**
+     * Récupère la production de l'animal par seconde selon les patch notes.
      * @return Une map contenant les articles produits et leur quantité.
      */
-    private Map<String, Integer> getProductionParSeconde() {
+    public Map<String, Integer> getProductionParSeconde() {
         Map<String, Integer> production = new HashMap<>();
         
-        // TODO: Récupérer via CatalogueDAO
-        switch (type) {
-            case "vache":
-                production.put("lait", 20);
-                production.put("fumier", 5);
-                break;
-            case "mouton":
-                production.put("laine", 5);
-                production.put("fumier", 5);
-                break;
-            case "poule":
-                production.put("oeufs", 1);
-                break;
+        if (!vivant || deficit) {
+            return production;
+        }
+        
+        
+        AnimalInfo info = CatalogueService.getInstance().getAnimalInfo(this.type);
+        if (info != null && info.getArticlesProduits() != null) {
+            
+            switch (this.type.toLowerCase()) {
+                case "vache":
+                    production.put("lait", 20);    
+                    production.put("fumier", 5);   
+                    break;
+                case "mouton":
+                    production.put("laine", 5);    
+                    production.put("fumier", 5);   
+                    break;
+                case "poule":
+                    production.put("oeuf", 1);     
+                    break;
+                default:
+                    
+                    for (String article : info.getArticlesProduits()) {
+                        production.put(article, 1);
+                    }
+                    break;
+            }
+        } else {
+            
+            switch (this.type.toLowerCase()) {
+                case "vache":
+                    production.put("lait", 20);
+                    production.put("fumier", 5);
+                    break;
+                case "mouton":
+                    production.put("laine", 5);
+                    production.put("fumier", 5);
+                    break;
+                case "poule":
+                    production.put("oeuf", 1);
+                    break;
+                default:
+                    System.err.println("Type d'animal inconnu: " + this.type);
+                    break;
+            }
         }
         
         return production;
     }
 
+    
     public int getId() {
         return id;
     }

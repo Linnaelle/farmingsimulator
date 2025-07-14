@@ -18,7 +18,7 @@ public class Joueur {
         this.difficulte = difficulte;
     }
 
-    // Getters
+    
     public int getId() {
         return id;
     }
@@ -35,7 +35,7 @@ public class Joueur {
         return difficulte;
     }
 
-    // Setters
+    
     public void setId(int id) {
         this.id = id;
     }
@@ -52,7 +52,7 @@ public class Joueur {
         this.difficulte = difficulte;
     }
 
-    // Méthode utilitaire
+    
     @Override
     public String toString() {
         return "Joueur{" +

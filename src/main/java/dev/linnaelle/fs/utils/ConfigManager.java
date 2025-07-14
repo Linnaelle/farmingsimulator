@@ -6,10 +6,6 @@ import dev.linnaelle.fs.model.Config;
 
 import java.io.*;
 
-/**
- * Classe utilitaire pour gérer la configuration du jeu.
- * Charge et sauvegarde la configuration dans un fichier JSON.
- */
 public class ConfigManager {
     private static final String CONFIG_FILE = "config.json";
     private static Config config;
@@ -59,8 +55,6 @@ public class ConfigManager {
         return config;
     }
 
-    // --- Méthodes d'accès direct aux propriétés de GameConfig via ConfigManager ---
-    // GameConfig
     public static boolean isFullscreen() { return getConfig().getGameConfig().isFullscreen(); }
     public static String getTitle() { return getConfig().getGameConfig().getTitle(); }
     public static String getVersion() { return getConfig().getGameConfig().getVersion(); }
@@ -71,10 +65,8 @@ public class ConfigManager {
     public static double getVolume() { return getConfig().getGameConfig().getVolume(); }
     public static boolean isAutoSave() { return getConfig().getGameConfig().isAutoSave(); }
     public static int getAutoSaveIntervalMinutes() { return getConfig().getGameConfig().getAutoSaveIntervalMinutes(); }
-    // PlayerConfig
     public static String getDefaultPlayerName() { return getConfig().getPlayerConfig().getDefaultName(); }
     public static int getStartMoney() { return getConfig().getPlayerConfig().getStartMoney(); }
-    // DatabaseConfig
     public static String getDatabasePath() { return getConfig().getDatabaseConfig().getPath(); }
     public static boolean isMemoryMode() { return getConfig().getDatabaseConfig().isMemoryMode(); }
 }

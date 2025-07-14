@@ -13,7 +13,6 @@ C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\j
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\Main.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\utils\GameTimer.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\services\EconomieService.java
-C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\model\types\TypeCulture.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\Joueur.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\dao\DifficulteDao.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\Entrepot.java
@@ -31,7 +30,6 @@ C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\j
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\TypeEquipement.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\dao\ChampDao.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\dao\FermeDao.java
-C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\model\types\TypeArticle.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\utils\DatabaseManager.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\dao\StructureProductionDao.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\services\CatalogueService.java
@@ -43,12 +41,11 @@ C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\j
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\GameApplication.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\dao\JoueurDao.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\utils\ConfigManager.java
+C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\game\GameConsole.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\dao\UsineDao.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\ReservoirEau.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\GestionnaireEquipement.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\StructureProduction.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\ArticleInfo.java
-C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\model\types\TypeUsine.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\EtatChamp.java
-C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\model\types\TypeEquipement.java
 C:\Users\Clem\Desktop\Cours\Cluster de DB\Farming simulator (Java FX)\src\main\java\dev\linnaelle\fs\entities\Champ.java

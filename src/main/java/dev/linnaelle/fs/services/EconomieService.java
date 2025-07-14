@@ -32,8 +32,12 @@ public class EconomieService {
         return instance;
     }
     
-    // === CALCUL DES PRIX ===
-    
+    /**
+     * Obtient le prix de vente d'un article selon la difficulté
+     * @param article L'article à vendre
+     * @param difficulte La difficulté actuelle
+     * @return Le prix de vente de l'article
+     */
     public double getPrixVente(String article, Difficulte difficulte) {
         ArticleInfo info = catalogueService.getArticleInfo(article);
         if (info == null) {
@@ -45,26 +49,28 @@ public class EconomieService {
         return prixBase * difficulte.getMultiplicateurVente();
     }
     
+    /**
+     * Obtient le prix d'achat d'un item selon la difficulté
+     * @param item L'item à acheter
+     * @param difficulte La difficulté actuelle
+     * @return Le prix d'achat de l'item
+     */
     public double getPrixAchat(String item, Difficulte difficulte) {
-        // Pour les animaux
         AnimalInfo animalInfo = catalogueService.getAnimalInfo(item);
         if (animalInfo != null) {
             return animalInfo.getPrixAchat() * difficulte.getMultiplicateurAchat();
         }
         
-        // Pour les équipements
         EquipementInfo equipInfo = catalogueService.getEquipementInfo(item);
         if (equipInfo != null) {
             return equipInfo.getPrixAchat() * difficulte.getMultiplicateurAchat();
         }
         
-        // Pour les cultures
         CultureInfo cultureInfo = catalogueService.getCultureInfo(item);
         if (cultureInfo != null) {
             return cultureInfo.getPrixAchat() * difficulte.getMultiplicateurAchat();
         }
         
-        // Pour les usines
         UsineInfo usineInfo = catalogueService.getUsineInfo(item);
         if (usineInfo != null) {
             return usineInfo.getPrixAchat() * difficulte.getMultiplicateurAchat();
@@ -74,8 +80,13 @@ public class EconomieService {
         return 0.0;
     }
     
-    // === ACHATS ===
-    
+    /**
+     * Achète un équipement pour la ferme
+     * @param ferme La ferme où acheter l'équipement
+     * @param type Le type d'équipement à acheter
+     * @param difficulte La difficulté actuelle
+     * @return true si l'achat a réussi, false sinon
+     */
     public boolean acheterEquipement(Ferme ferme, String type, Difficulte difficulte) {
         if (!catalogueService.isEquipementValid(type)) {
             System.err.println("[ERROR] Type d'équipement invalide: " + type);
@@ -85,14 +96,11 @@ public class EconomieService {
         double prix = getPrixAchat(type, difficulte);
         
         if (ferme.getRevenu() >= prix) {
-            // Créer et sauvegarder le nouvel équipement
             Equipement equipement = new Equipement();
             equipement.setType(type);
             equipement.setEnUtilisation(false);
-            // Associer à la ferme via le gestionnaire d'équipement
             
             if (equipementDao.save(equipement) != null) {
-                // Débiter le prix et mettre à jour la ferme
                 ferme.setRevenu(ferme.getRevenu() - prix);
                 fermeDao.update(ferme);
                 
@@ -106,6 +114,14 @@ public class EconomieService {
         return false;
     }
     
+    /**
+     * Achète un animal pour la ferme
+     * @param ferme La ferme où acheter l'animal
+     * @param type Le type d'animal à acheter
+     * @param quantite La quantité d'animaux à acheter
+     * @param difficulte La difficulté actuelle
+     * @return true si l'achat a réussi, false sinon
+     */
     public boolean acheterAnimal(Ferme ferme, String type, int quantite, Difficulte difficulte) {
         if (!catalogueService.isAnimalValid(type)) {
             System.err.println("[ERROR] Type d'animal invalide: " + type);
@@ -119,7 +135,6 @@ public class EconomieService {
             int animauxAchetes = 0;
             
             for (int i = 0; i < quantite; i++) {
-                // Trouver un champ avec ferme animale ayant de la place
                 boolean place = false;
                 for (Champ champ : ferme.getChamps()) {
                     if (champ.getFermeAnimale() != null && 
@@ -163,6 +178,13 @@ public class EconomieService {
         return false;
     }
     
+    /**
+     * Achète une structure de production (usine ou serre)
+     * @param ferme La ferme où acheter la structure
+     * @param type Le type de structure à acheter
+     * @param difficulte La difficulté actuelle
+     * @return true si l'achat a réussi, false sinon
+     */
     public boolean acheterStructure(Ferme ferme, String type, Difficulte difficulte) {
         if (!catalogueService.isUsineValid(type)) {
             System.err.println("[ERROR] Type de structure invalide: " + type);
@@ -200,8 +222,13 @@ public class EconomieService {
         return false;
     }
     
+    /**
+     * Achète un champ pour la ferme
+     * @param ferme La ferme où acheter le champ
+     * @param difficulte La difficulté actuelle
+     * @return true si l'achat a réussi, false sinon
+     */
     public boolean acheterChamp(Ferme ferme, Difficulte difficulte) {
-        // Prix fixe pour un champ selon la difficulté
         double prixChamp = 10000.0 * difficulte.getMultiplicateurAchat();
         
         if (ferme.getRevenu() >= prixChamp) {
@@ -229,6 +256,14 @@ public class EconomieService {
         return false;
     }
     
+    /**
+     * Achète une culture pour un champ
+     * @param ferme La ferme où acheter la culture
+     * @param typeCulture Le type de culture à acheter
+     * @param champId L'ID du champ où semer la culture
+     * @param difficulte La difficulté actuelle
+     * @return true si l'achat a réussi, false sinon
+     */
     public boolean acheterCulture(Ferme ferme, String typeCulture, int champId, Difficulte difficulte) {
         if (!catalogueService.isCultureValid(typeCulture)) {
             System.err.println("[ERROR] Type de culture invalide: " + typeCulture);
@@ -261,8 +296,14 @@ public class EconomieService {
         return false;
     }
     
-    // === VENTES ===
-    
+    /**
+     * Vendre un article de la ferme
+     * @param ferme La ferme où vendre l'article
+     * @param article Le nom de l'article à vendre
+     * @param quantite La quantité à vendre
+     * @param difficulte La difficulté actuelle
+     * @return Le gain de la vente, 0 si échec
+     */
     public double vendreArticle(Ferme ferme, String article, int quantite, Difficulte difficulte) {
         if (ferme.getStockPrincipal().getQuantite(article) >= quantite) {
             double prixUnitaire = getPrixVente(article, difficulte);
@@ -283,10 +324,25 @@ public class EconomieService {
         return 0.0;
     }
     
+    /**
+     * Vendre une culture du champ
+     * @param ferme La ferme où vendre la culture
+     * @param culture Le type de culture à vendre
+     * @param quantite La quantité à vendre
+     * @param difficulte La difficulté actuelle
+     * @return Le gain de la vente, 0 si échec
+     */
     public double vendreCulture(Ferme ferme, String culture, int quantite, Difficulte difficulte) {
         return vendreArticle(ferme, culture, quantite, difficulte);
     }
     
+    /**
+     * Vendre un animal de la ferme
+     * @param ferme La ferme où vendre l'animal
+     * @param animal L'animal à vendre
+     * @param difficulte La difficulté actuelle
+     * @return Le prix de vente de l'animal, 0 si échec
+     */
     public double vendreAnimal(Ferme ferme, Animal animal, Difficulte difficulte) {
         if (animal.isVivant()) {
             double prix = getPrixVente(animal.getType(), difficulte);
@@ -307,7 +363,6 @@ public class EconomieService {
     
     public boolean vendreEquipement(Ferme ferme, Equipement equipement, Difficulte difficulte) {
         if (!equipement.isEnUtilisation()) {
-            // Prix de revente = 70% du prix d'achat
             double prixRevente = getPrixAchat(equipement.getType(), difficulte) * 0.7;
             
             if (equipementDao.delete(equipement.getId())) {
@@ -322,26 +377,6 @@ public class EconomieService {
         }
         
         return false;
-    }
-    
-    // === MÉTHODES UTILITAIRES ===
-    
-    public double calculerValeurFerme(Ferme ferme, Difficulte difficulte) {
-        double valeur = ferme.getRevenu();
-        
-        // Valeur des champs
-        for (Champ champ : ferme.getChamps()) {
-            valeur += champ.getPrixAchat();
-        }
-        
-        // Valeur des structures
-        for (StructureProduction structure : ferme.getStructures()) {
-            valeur += structure.getPrixAchat();
-        }
-        
-        // TODO: Ajouter valeur des équipements et animaux
-        
-        return valeur;
     }
     
     public boolean peutAcheter(Ferme ferme, String item, int quantite, Difficulte difficulte) {

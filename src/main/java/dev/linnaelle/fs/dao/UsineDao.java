@@ -20,7 +20,7 @@ public class UsineDao {
         try (Connection conn = DatabaseManager.get()) {
             conn.setAutoCommit(false);
             
-            try (PreparedStatement stmtParent = conn.prepareStatement(sqlStructure, Statement.RETURN_GENERATED_KEYS);
+            try (PreparedStatement stmtParent = conn.prepareStatement(sqlStructure);
                 PreparedStatement stmtEnfant = conn.prepareStatement(sqlUsine);
                 PreparedStatement stmtLastId = conn.prepareStatement(sqlGetLastId)) {
                 

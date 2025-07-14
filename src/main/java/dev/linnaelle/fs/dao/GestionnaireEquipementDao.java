@@ -31,16 +31,19 @@ public class GestionnaireEquipementDao {
         String sql = "INSERT INTO GestionnaireEquipement (ferme_id) VALUES (?)";
         
         try (Connection conn = DatabaseManager.get();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, gestionnaire.getFermeId());
             
             int affectedRows = stmt.executeUpdate();
             
             if (affectedRows > 0) {
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    gestionnaire.setId(generatedKeys.getInt(1));
+                try (Statement lastIdStmt = conn.createStatement();
+                    ResultSet generatedKeys = lastIdStmt.executeQuery("SELECT last_insert_rowid()")) {
+
+                    if (generatedKeys.next()) {
+                        gestionnaire.setId(generatedKeys.getInt(1));
+                    }
                 }
                 return gestionnaire;
             }

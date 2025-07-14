@@ -20,13 +20,17 @@ public class Ferme {
         this.name = "Ferme";
         this.champs = new ArrayList<>();
         this.structures = new ArrayList<>();
+        this.stockPrincipal = new StockPrincipal(this.id);
+        this.entrepot = new Entrepot();
+        this.reservoirEau = new ReservoirEau();
+        this.equipements = new GestionnaireEquipement(this.id);
+        this.revenu = 0.0;
     }
 
     public Ferme(String name, int joueurId) {
         this();
         this.name = name;
         this.joueurId = joueurId;
-        this.revenu = 0.0;
     }
 
     public int getId() {

@@ -24,7 +24,7 @@ public class ReservoirEauDao {
         try (Connection conn = DatabaseManager.get()) {
             conn.setAutoCommit(false);
             
-            try (PreparedStatement stmtParent = conn.prepareStatement(sqlStockage, Statement.RETURN_GENERATED_KEYS);
+            try (PreparedStatement stmtParent = conn.prepareStatement(sqlStockage);
                 PreparedStatement stmtEnfant = conn.prepareStatement(sqlReservoir);
                 PreparedStatement stmtLastId = conn.prepareStatement(sqlGetLastId)) {
                 

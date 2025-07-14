@@ -22,7 +22,7 @@ public class ChampDao {
         String sql = "INSERT INTO Champ (ferme_id, name, numero, type_culture, temps_action, etat, prix_achat) VALUES (?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseManager.get();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, champ.getFermeId());
             stmt.setString(2, champ.getName());
@@ -35,11 +35,14 @@ public class ChampDao {
             int affectedRows = stmt.executeUpdate();
             
             if (affectedRows > 0) {
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    champ.setId(generatedKeys.getInt(1));
+                try (Statement lastIdStmt = conn.createStatement();
+                    ResultSet rs = lastIdStmt.executeQuery("SELECT last_insert_rowid()")) {
+                    if (rs.next()) {
+                        champ.setId(rs.getInt(1));
+                    }
+
+                    return champ;
                 }
-                return champ;
             }
             
         } catch (SQLException e) {

@@ -31,7 +31,7 @@ public class FermeDao {
         String sql = "INSERT INTO Ferme (joueur_id, name, revenu) VALUES (?, ?, ?)";
         
         try (Connection conn = DatabaseManager.get();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, ferme.getJoueurId());
             stmt.setString(2, ferme.getName());
@@ -40,17 +40,14 @@ public class FermeDao {
             int affectedRows = stmt.executeUpdate();
             
             if (affectedRows > 0) {
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    ferme.setId(generatedKeys.getInt(1));
+                try (Statement lastIdStmt = conn.createStatement();
+                     ResultSet generatedKeys = lastIdStmt.executeQuery("SELECT last_insert_rowid()")) {
                     
-                    // Créer les stockages par défaut
+                    if (generatedKeys.next()) {
+                        ferme.setId(generatedKeys.getInt(1));
+                    }
                     createDefaultStockages(ferme);
-                    
-                    // Créer le gestionnaire d'équipement
                     createGestionnaireEquipement(ferme);
-                    
-                    return ferme;
                 }
             }
             
@@ -173,7 +170,7 @@ public class FermeDao {
         entrepot = stockageDao.saveEntrepot(entrepot);
         ferme.setEntrepot(entrepot);
         
-        ReservoirEau reservoir = new ReservoirEau(ferme.getId(), 10000); // Capacité par défaut de 10,000 litres
+        ReservoirEau reservoir = new ReservoirEau(ferme.getId(), 10000); 
         ReservoirEauDao reservoirDao = new ReservoirEauDao();
         reservoir = reservoirDao.save(reservoir);
         ferme.setReservoirEau(reservoir);

@@ -19,27 +19,29 @@ public class JoueurDao {
      * @return The saved Joueur with its ID set, or null if the save failed.
      */
     public Joueur save(Joueur joueur) {
-        String sql = "INSERT INTO Joueur (name, temps_jeu, difficulte) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO joueur (name, difficulte, temps_jeu) VALUES (?, ?, ?)";
         
         try (Connection conn = DatabaseManager.get();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, joueur.getName());
-            stmt.setLong(2, joueur.getTempsJeu());
-            stmt.setString(3, joueur.getDifficulte().getNom());
+            stmt.setString(2, joueur.getDifficulte().getNom());
+            stmt.setLong(3, joueur.getTempsJeu());
             
-            int affectedRows = stmt.executeUpdate();
+            int result = stmt.executeUpdate();
             
-            if (affectedRows > 0) {
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    joueur.setId(generatedKeys.getInt(1));
+            if (result > 0) {
+                try (Statement lastIdStmt = conn.createStatement();
+                    ResultSet rs = lastIdStmt.executeQuery("SELECT last_insert_rowid()")) {
+                    if (rs.next()) {
+                        joueur.setId(rs.getInt(1));
+                    }
                 }
                 return joueur;
             }
             
         } catch (SQLException e) {
-            System.err.println("[ERROR] Erreur lors de la sauvegarde du joueur: " + e.getMessage());
+            System.err.println("Erreur lors de la sauvegarde du joueur: " + e.getMessage());
         }
         
         return null;

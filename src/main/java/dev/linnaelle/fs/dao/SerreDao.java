@@ -247,7 +247,7 @@ public class SerreDao {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, fermeId);
-            stmt.setLong(2, tempsCourant - 300000); // 5 minutes
+            stmt.setLong(2, tempsCourant - 300000); 
             ResultSet rs = stmt.executeQuery();
             
             while (rs.next()) {

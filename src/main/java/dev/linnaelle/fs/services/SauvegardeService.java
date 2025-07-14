@@ -20,7 +20,6 @@ public class SauvegardeService {
     private String cheminSauvegardes;
     private Timer timerSauvegardeAuto;
     
-    // DAO nécessaires
     private JoueurDao joueurDao;
     private FermeDao fermeDao;
     private DifficulteDao difficulteDao;
@@ -28,7 +27,6 @@ public class SauvegardeService {
     private StockageDao stockageDao;
     private ReservoirEauDao reservoirDao;
     private StructureProductionDao structureDao;
-    // private GestionnaireEquipementDao equipementDao;
     
     private SauvegardeService() {
         this.cheminSauvegardes = "saves/";
@@ -39,9 +37,7 @@ public class SauvegardeService {
         this.stockageDao = new StockageDao();
         this.reservoirDao = new ReservoirEauDao();
         this.structureDao = new StructureProductionDao();
-        // this.equipementDao = new GestionnaireEquipementDao();
         
-        // Créer le dossier de sauvegarde s'il n'existe pas
         creerDossierSauvegardes();
     }
     
@@ -52,8 +48,11 @@ public class SauvegardeService {
         return instance;
     }
     
-    // === SAUVEGARDE MANUELLE ===
-    
+    /**
+     * Sauvegarde l'état actuel du joueur et de sa ferme
+     * @param joueur
+     * @return
+     */
     public boolean sauvegarder(Joueur joueur) {
         if (joueur == null) {
             System.err.println("[ERROR] Impossible de sauvegarder un joueur null");
@@ -61,10 +60,7 @@ public class SauvegardeService {
         }
         
         try {
-            // Sauvegarder en base de données
             boolean successDB = sauvegarderEnBase(joueur);
-            
-            // Sauvegarder en fichier de backup
             sauvegarderEnFichier(joueur);
             
             if (successDB) {
@@ -84,73 +80,76 @@ public class SauvegardeService {
     
     private boolean sauvegarderEnBase(Joueur joueur) {
         try {
-            // Mettre à jour le temps de jeu
             joueur.setTempsJeu(System.currentTimeMillis() - joueur.getTempsJeu());
-            
-            // Sauvegarder le joueur
             boolean joueurSaved = joueurDao.update(joueur);
-            
-            // Récupérer la ferme du joueur
             Ferme ferme = fermeDao.findByJoueurId(joueur.getId());
+
             if (ferme == null) {
                 System.err.println("[ERROR] Ferme introuvable pour le joueur: " + joueur.getName());
                 return false;
             }
             
-            // Sauvegarder la ferme
             boolean fermeSaved = fermeDao.update(ferme);
-            
-            // Sauvegarder tous les composants de la ferme
             boolean composantsSaved = sauvegarderComposantsFerme(ferme);
             
             return joueurSaved && fermeSaved && composantsSaved;
-            
         } catch (Exception e) {
             System.err.println("[ERROR] Erreur lors de la sauvegarde en base: " + e.getMessage());
             return false;
         }
     }
     
-    private boolean sauvegarderComposantsFerme(Ferme ferme) {
+    /**
+     * Sauvegarde les composants de la ferme (champs, structures, stockage, etc.)
+     * @param ferme La ferme à sauvegarder
+     * @return true si la sauvegarde a réussi, false sinon
+     */
+    public boolean sauvegarderComposantsFerme(Ferme ferme) {
         try {
-            // Sauvegarder les stockages
-            stockageDao.updateArticles(ferme.getStockPrincipal().getId(), ferme.getStockPrincipal().getArticles());
-            stockageDao.updateArticles(ferme.getEntrepot().getId(), ferme.getEntrepot().getArticles());
-            reservoirDao.update(ferme.getReservoirEau());
+            boolean success = true;
             
-            // Sauvegarder les champs
-            for (Champ champ : ferme.getChamps()) {
-                champDao.update(champ);
-                
-                // Sauvegarder les animaux s'il y en a
-                if (champ.getFermeAnimale() != null) {
-                    // TODO: Implémenter FermeAnimaleDao si nécessaire
-                    // fermeAnimaleDao.update(champ.getFermeAnimale());
+            if (ferme.getStockPrincipal() != null) {
+                success &= stockageDao.updateArticles(ferme.getStockPrincipal().getId(), ferme.getStockPrincipal().getArticles());
+            }
+            
+            if (ferme.getEntrepot() != null) {
+                success &= stockageDao.updateArticles(ferme.getEntrepot().getId(), ferme.getEntrepot().getArticles());
+            }
+            
+            if (ferme.getReservoirEau() != null) {
+                success &= reservoirDao.update(ferme.getReservoirEau());
+            }
+            
+            if (ferme.getChamps() != null) {
+                for (Champ champ : ferme.getChamps()) {
+                    success &= champDao.update(champ);
                     
-                    AnimalDao animalDao = new AnimalDao();
-                    for (Animal animal : champ.getFermeAnimale().getAnimaux()) {
-                        animalDao.update(animal);
+                    if (champ.getFermeAnimale() != null && champ.getFermeAnimale().getAnimaux() != null) {
+                        AnimalDao animalDao = new AnimalDao();
+                        for (Animal animal : champ.getFermeAnimale().getAnimaux()) {
+                            if (ferme.getReservoirEau() != null) {
+                                animal.mettreAJour(System.currentTimeMillis(), ferme.getReservoirEau());
+                            }
+                            success &= animalDao.update(animal);
+                        }
                     }
                 }
             }
             
-            // Sauvegarder les structures de production
-            for (StructureProduction structure : ferme.getStructures()) {
-                if (structure instanceof Serre) {
-                    structureDao.updateSerre((Serre) structure);
-                } else if (structure instanceof Usine) {
-                    structureDao.updateUsine((Usine) structure);
+            if (ferme.getStructures() != null) {
+                for (StructureProduction structure : ferme.getStructures()) {
+                    if (structure instanceof Serre) {
+                        success &= structureDao.updateSerre((Serre) structure);
+                    } else if (structure instanceof Usine) {
+                        success &= structureDao.updateUsine((Usine) structure);
+                    }
                 }
             }
             
-            // Sauvegarder le gestionnaire d'équipement
-            // TODO: Implémenter update dans GestionnaireEquipementDao si nécessaire
-            // equipementDao.update(ferme.getEquipements());
-            
-            return true;
-            
+            return success;
         } catch (Exception e) {
             System.err.println("[ERROR] Erreur lors de la sauvegarde des composants: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -159,50 +158,73 @@ public class SauvegardeService {
         try {
             String nomFichier = genererNomFichier(joueur.getName());
             String cheminComplet = cheminSauvegardes + nomFichier;
-            
-            // Récupérer la ferme du joueur
             Ferme ferme = fermeDao.findByJoueurId(joueur.getId());
+
             if (ferme == null) {
                 System.err.println("[ERROR] Ferme introuvable pour la sauvegarde fichier");
                 return false;
             }
             
             try (PrintWriter writer = new PrintWriter(new FileWriter(cheminComplet))) {
-                // En-tête du fichier
                 writer.println("# Sauvegarde Farm Simulator");
                 writer.println("# Joueur: " + joueur.getName());
                 writer.println("# Date: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                 writer.println("# Version: 1.0");
                 writer.println();
-                
-                // Informations du joueur
+
                 writer.println("[JOUEUR]");
                 writer.println("nom=" + joueur.getName());
                 writer.println("difficulte=" + joueur.getDifficulte().getNom());
                 writer.println("tempsJeu=" + joueur.getTempsJeu());
                 writer.println();
-                
-                // Informations de la ferme
+
                 writer.println("[FERME]");
                 writer.println("nom=" + ferme.getName());
                 writer.println("revenu=" + ferme.getRevenu());
-                writer.println("nombreChamps=" + ferme.getChamps().size());
-                writer.println("nombreStructures=" + ferme.getStructures().size());
+                if (ferme.getChamps() != null) {
+                    writer.println("nombreChamps=" + ferme.getChamps().size());
+                }
+                if (ferme.getStructures() != null) {
+                    writer.println("nombreStructures=" + ferme.getStructures().size());
+                }
                 writer.println();
-                
-                // Statistiques de stockage
+
                 writer.println("[STOCKAGE]");
-                writer.println("stockPrincipal_capacite=" + ferme.getStockPrincipal().getCapaciteMax());
-                writer.println("entrepot_capacite=" + ferme.getEntrepot().getCapaciteMax());
-                writer.println("reservoirEau_quantite=" + ferme.getReservoirEau().getQuantite());
-                writer.println("reservoirEau_capacite=" + ferme.getReservoirEau().getCapacite());
+                if (ferme.getStockPrincipal() != null) {
+                    writer.println("stockPrincipal_capacite=" + ferme.getStockPrincipal().getCapaciteMax());
+                }
+                if (ferme.getEntrepot() != null) {
+                    writer.println("entrepot_capacite=" + ferme.getEntrepot().getCapaciteMax());
+                }
+                if (ferme.getReservoirEau() != null) {
+                    writer.println("reservoirEau_quantite=" + ferme.getReservoirEau().getQuantite());
+                    writer.println("reservoirEau_capacite=" + ferme.getReservoirEau().getCapacite());
+                }
+                writer.println();
+
+                writer.println("[CHAMPS]");
+                if (ferme.getChamps() != null) {
+                    for (Champ champ : ferme.getChamps()) {
+                        writer.println("champ_" + champ.getNumero() + "=" + champ.getEtat().name() + 
+                                     "," + (champ.getTypeCulture() != null ? champ.getTypeCulture() : "vide"));
+                        if (champ.getFermeAnimale() != null) {
+                            FermeAnimale fermeAnimale = champ.getFermeAnimale();
+                            int nbAnimaux = fermeAnimale.getAnimaux() != null ? fermeAnimale.getAnimaux().size() : 0;
+                            writer.println("champ_" + champ.getNumero() + "_animaux=" + 
+                                         fermeAnimale.getTypeAnimal() + "," + 
+                                         nbAnimaux + "/" + fermeAnimale.getCapaciteMax());
+                        }
+                    }
+                }
                 writer.println();
                 
-                // Champs
-                writer.println("[CHAMPS]");
-                for (Champ champ : ferme.getChamps()) {
-                    writer.println("champ_" + champ.getNumero() + "=" + champ.getEtat().name() + 
-                                 "," + (champ.getTypeCulture() != null ? champ.getTypeCulture() : "vide"));
+                writer.println("[STRUCTURES]");
+                if (ferme.getStructures() != null) {
+                    for (StructureProduction structure : ferme.getStructures()) {
+                        writer.println("structure_" + structure.getType() + "=" + 
+                                     (structure.isActive() ? "active" : "inactive") + 
+                                     "," + (structure.isEnPause() ? "pause" : "marche"));
+                    }
                 }
                 writer.println();
                 
@@ -215,9 +237,12 @@ public class SauvegardeService {
             return false;
         }
     }
-    
-    // === CHARGEMENT ===
-    
+
+    /**
+     * Charge une sauvegarde depuis la base de données
+     * @param nomJoueur Nom du joueur à charger
+     * @return Joueur chargé ou null si erreur
+     */    
     public Joueur charger(String nomJoueur) {
         if (nomJoueur == null || nomJoueur.trim().isEmpty()) {
             System.err.println("[ERROR] Nom de joueur invalide");
@@ -225,16 +250,9 @@ public class SauvegardeService {
         }
         
         try {
-            // Charger depuis la base de données
             Joueur joueur = joueurDao.findByName(nomJoueur.trim());
             
             if (joueur != null) {
-                // Charger la ferme complète
-                // Ferme ferme = fermeDao.findByJoueurId(joueur.getId());
-                // Note: On ne peut pas faire joueur.setFerme() car la méthode n'existe pas
-                // La ferme sera accessible via fermeDao.findByJoueurId() quand nécessaire
-                
-                // Charger la difficulté
                 Difficulte difficulte = difficulteDao.findByNom(joueur.getDifficulte().getNom());
                 joueur.setDifficulte(difficulte);
                 
@@ -252,6 +270,11 @@ public class SauvegardeService {
         }
     }
     
+    /**
+     * Implémente le chargement depuis fichier
+     * @param nomFichier Nom du fichier de sauvegarde
+     * @return Joueur chargé ou null si erreur
+     */
     public Joueur chargerDepuisFichier(String nomFichier) {
         try {
             Path fichier = Paths.get(cheminSauvegardes + nomFichier);
@@ -260,19 +283,33 @@ public class SauvegardeService {
                 return null;
             }
             
-            // TODO: Implémenter le parsing du fichier de sauvegarde
-            // Pour l'instant, on renvoie null car la priorité est la base de données
-            System.out.println("[INFO] Chargement depuis fichier non implémenté (utilise la base de données)");
-            return null;
+            Joueur joueur = parserFichierSauvegarde(fichier.toString());
+            
+            if (joueur != null) {
+                System.out.println("[INFO] Joueur chargé depuis le fichier: " + joueur.getName());
+                
+                Ferme ferme = fermeDao.findByJoueurId(joueur.getId());
+                if (ferme != null) {
+                    System.out.println("[INFO] Ferme associée trouvée: " + ferme.getName());
+                }
+                
+                return joueur;
+            } else {
+                System.err.println("[ERROR] Impossible de parser le fichier de sauvegarde");
+            }
             
         } catch (Exception e) {
             System.err.println("[ERROR] Erreur lors du chargement depuis fichier: " + e.getMessage());
-            return null;
         }
+        
+        return null;
     }
     
-    // === SAUVEGARDE AUTOMATIQUE ===
-    
+    /**
+     * Démarre une sauvegarde automatique à intervalle régulier
+     * @param joueur Joueur pour lequel la sauvegarde est effectuée
+     * @param intervalleMinutes Intervalle en minutes entre chaque sauvegarde automatique
+     */
     public void demarrerSauvegardeAutomatique(Joueur joueur, long intervalleMinutes) {
         arreterSauvegardeAutomatique();
         
@@ -291,6 +328,9 @@ public class SauvegardeService {
         System.out.println("[INFO] Sauvegarde automatique activée (toutes les " + intervalleMinutes + " minutes)");
     }
     
+    /**
+     * Arrête la sauvegarde automatique si elle est en cours
+     */
     public void arreterSauvegardeAutomatique() {
         if (timerSauvegardeAuto != null) {
             timerSauvegardeAuto.cancel();
@@ -299,6 +339,10 @@ public class SauvegardeService {
         }
     }
     
+    /**
+     * Effectue une sauvegarde automatique du joueur
+     * @param joueur Joueur à sauvegarder
+     */
     public void sauvegardeAutomatique(Joueur joueur) {
         System.out.println("[INFO] Sauvegarde automatique en cours...");
         boolean success = sauvegarder(joueur);
@@ -309,23 +353,17 @@ public class SauvegardeService {
             System.err.println("[ERROR] Échec de la sauvegarde automatique");
         }
     }
-    
-    // === GESTION DES FICHIERS ===
-    
+
+    /**
+     * Supprime une sauvegarde du joueur
+     * @param nomJoueur Nom du joueur dont la sauvegarde doit être supprimée
+     * @return true si la suppression a réussi, false sinon
+     */    
     public boolean supprimerSauvegarde(String nomJoueur) {
         try {
-            // Supprimer de la base de données
             Joueur joueur = joueurDao.findByName(nomJoueur);
             if (joueur != null) {
                 boolean deleted = joueurDao.delete(joueur.getId());
-                
-                // Supprimer aussi le fichier backup s'il existe
-                String nomFichier = genererNomFichier(nomJoueur);
-                Path fichier = Paths.get(cheminSauvegardes + nomFichier);
-                
-                if (Files.exists(fichier)) {
-                    Files.delete(fichier);
-                }
                 
                 if (deleted) {
                     System.out.println("[INFO] Sauvegarde supprimée: " + nomJoueur);
@@ -340,15 +378,23 @@ public class SauvegardeService {
         return false;
     }
     
+    /**
+     * Vérifie si une sauvegarde existe pour le joueur donné
+     * @param nomJoueur Nom du joueur à vérifier
+     * @return true si la sauvegarde existe, false sinon
+     */
     public boolean existeSauvegarde(String nomJoueur) {
         return joueurDao.findByName(nomJoueur) != null;
     }
     
+    /**
+     * Liste les sauvegardes disponibles
+     * @return Liste des noms de joueurs ayant une sauvegarde
+     */
     public List<String> listerSauvegardes() {
-        // Créer une liste des noms de joueurs en utilisant findAll()
         List<String> noms = new ArrayList<>();
         try {
-            List<Joueur> joueurs = joueurDao.findAll(); // Assuming this method exists
+            List<Joueur> joueurs = joueurDao.findAll();
             for (Joueur joueur : joueurs) {
                 noms.add(joueur.getName());
             }
@@ -357,8 +403,6 @@ public class SauvegardeService {
         }
         return noms;
     }
-    
-    // === UTILITAIRES ===
     
     private void creerDossierSauvegardes() {
         try {
@@ -378,6 +422,10 @@ public class SauvegardeService {
         return nomNettoye + "_" + timestamp + ".fsave";
     }
     
+    /**
+     * Nettoie les anciens fichiers de sauvegarde
+     * @param joursMax Nombre de jours maximum pour conserver les sauvegardes
+     */
     public void nettoyerVieuxFichiers(int joursMax) {
         try {
             Path dossier = Paths.get(cheminSauvegardes);
@@ -409,8 +457,10 @@ public class SauvegardeService {
         }
     }
     
-    // === MÉTHODES DE CONFIGURATION ===
-    
+    /**
+     * Définit le chemin des sauvegardes
+     * @param nouveauChemin Le nouveau chemin pour les sauvegardes
+     */
     public void setCheminSauvegardes(String nouveauChemin) {
         this.cheminSauvegardes = nouveauChemin;
         if (!nouveauChemin.endsWith("/")) {
@@ -423,10 +473,53 @@ public class SauvegardeService {
         return cheminSauvegardes;
     }
     
-    // === NETTOYAGE ===
-    
     public void shutdown() {
         arreterSauvegardeAutomatique();
         System.out.println("[INFO] Service de sauvegarde arrêté");
+    }
+
+    private Joueur parserFichierSauvegarde(String cheminFichier) {
+        try {
+            Path fichier = Paths.get(cheminFichier);
+            List<String> lignes = Files.readAllLines(fichier);
+            
+            String nomJoueur = null;
+            String difficulteNom = null;
+            long tempsJeu = 0;
+            
+            for (String ligne : lignes) {
+                ligne = ligne.trim();
+                
+                if (ligne.startsWith("nom=")) {
+                    nomJoueur = ligne.substring(4);
+                } else if (ligne.startsWith("difficulte=")) {
+                    difficulteNom = ligne.substring(11);
+                } else if (ligne.startsWith("tempsJeu=")) {
+                    try {
+                        tempsJeu = Long.parseLong(ligne.substring(9));
+                    } catch (NumberFormatException e) {
+                        System.err.println("[WARN] Format temps de jeu invalide: " + ligne);
+                    }
+                }
+            }
+            
+            if (nomJoueur != null && difficulteNom != null) {
+                Difficulte difficulte = difficulteDao.findByNom(difficulteNom);
+                
+                if (difficulte != null) {
+                    Joueur joueur = new Joueur();
+                    joueur.setName(nomJoueur);
+                    joueur.setDifficulte(difficulte);
+                    joueur.setTempsJeu(tempsJeu);
+                    
+                    return joueur;
+                }
+            }
+            
+        } catch (IOException e) {
+            System.err.println("[ERROR] Erreur lecture fichier: " + e.getMessage());
+        }
+        
+        return null;
     }
 }

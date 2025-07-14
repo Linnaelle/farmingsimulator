@@ -60,6 +60,11 @@ public abstract class Stockage {
         return false;
     }
 
+    /**
+     * Retourne la quantité d'un article dans le stockage.
+     * @param article L'article dont on veut connaître la quantité.
+     * @return La quantité de l'article, ou 0 si l'article n'est pas présent.
+     */
     public int getQuantite(String article) {
         return articles.getOrDefault(article, 0);
     }

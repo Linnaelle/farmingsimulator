@@ -28,11 +28,11 @@ public class FermeAnimale {
      */
     public boolean addAnimal(Animal animal) {
         if (animaux.size() >= capaciteMax) {
-            return false; // Capacité maximale atteinte
+            return false;
         }
         
         if (!typeAnimal.equals(animal.getType())) {
-            // TODO: Supprimer si l'on souhaite mélanger les types d'animaux
+            // Supprimer si l'on souhaite mélanger les types d'animaux
             return false;
         }
         

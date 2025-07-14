@@ -16,7 +16,7 @@ public class Difficulte {
         this.multiplicateurVente = multiplicateurVente;
     }
 
-    // Getters
+    
     public String getNom() {
         return nom;
     }
@@ -33,7 +33,7 @@ public class Difficulte {
         return multiplicateurVente;
     }
 
-    // Setters
+    
     public void setNom(String nom) {
         this.nom = nom;
     }

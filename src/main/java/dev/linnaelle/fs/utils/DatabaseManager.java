@@ -6,11 +6,6 @@ import dev.linnaelle.fs.model.Config;
 import java.sql.*;
 import java.io.File;
 
-/**
- * Classe utilitaire pour gérer la base de données SQLite avec HikariCP.
- * Implémente le pattern Singleton pour garantir une seule instance de DatabaseManager.
- * Gère l'initialisation du pool de connexions, la création des tables et la fermeture du pool.
- */
 public class DatabaseManager {
     private static DatabaseManager instance;
     private HikariDataSource dataSource;
@@ -18,21 +13,11 @@ public class DatabaseManager {
 
     private DatabaseManager() {}
 
-    /**
-     * Retourne l'instance unique de DatabaseManager (Singleton).
-     * @return L'instance de DatabaseManager.
-     */
     public static DatabaseManager getInstance() {
         if (instance == null) instance = new DatabaseManager();
         return instance;
     }
 
-    /**
-     * Retourne une connexion à la base de données.
-     * Utilise le pool de connexions HikariCP pour obtenir une connexion.
-     * @return Une instance de Connection.
-     * @throws SQLException Si une erreur SQL survient lors de l'obtention de la connexion.
-     */
     public static Connection get() throws SQLException { 
         return getInstance().getConnection(); 
     }
@@ -76,19 +61,10 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Retourne une connexion à la base de données depuis le pool.
-     * @return Une instance de Connection.
-     * @throws SQLException Si une erreur SQL survient lors de l'obtention de la connexion.
-     */
     public Connection getConnection() throws SQLException { 
         return dataSource.getConnection(); 
     }
 
-    /**
-     * Ferme le pool de connexions à la base de données.
-     * Cette méthode doit être appelée lors de la fermeture de l'application.
-     */
     public static void closeInstance() {
         if (instance != null && instance.dataSource != null && !instance.dataSource.isClosed()) {
             instance.dataSource.close();
@@ -103,7 +79,6 @@ public class DatabaseManager {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
-            // Table Difficulte (données de référence)
             String createDifficulteTable = """
                 CREATE TABLE IF NOT EXISTS Difficulte (
                     nom TEXT PRIMARY KEY,
@@ -115,7 +90,6 @@ public class DatabaseManager {
             stmt.execute(createDifficulteTable);
             System.out.println("Table 'Difficulte' créée.");
 
-            // Table Joueur
             String createJoueurTable = """
                 CREATE TABLE IF NOT EXISTS Joueur (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -128,7 +102,6 @@ public class DatabaseManager {
             stmt.execute(createJoueurTable);
             System.out.println("Table 'Joueur' créée.");
 
-            // Table Ferme
             String createFermeTable = """
                 CREATE TABLE IF NOT EXISTS Ferme (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -141,7 +114,6 @@ public class DatabaseManager {
             stmt.execute(createFermeTable);
             System.out.println("Table 'Ferme' créée.");
 
-            // Table abstraite Stockage (classe mère)
             String createStockageTable = """
                 CREATE TABLE IF NOT EXISTS Stockage (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -153,7 +125,6 @@ public class DatabaseManager {
             stmt.execute(createStockageTable);
             System.out.println("Table 'Stockage' créée.");
 
-            // Table StockPrincipal (hérite de Stockage)
             String createStockPrincipalTable = """
                 CREATE TABLE IF NOT EXISTS StockPrincipal (
                     stockage_id INTEGER PRIMARY KEY,
@@ -163,7 +134,6 @@ public class DatabaseManager {
             stmt.execute(createStockPrincipalTable);
             System.out.println("Table 'StockPrincipal' créée.");
 
-            // Table Entrepot (hérite de Stockage)
             String createEntrepotTable = """
                 CREATE TABLE IF NOT EXISTS Entrepot (
                     stockage_id INTEGER PRIMARY KEY,
@@ -173,7 +143,6 @@ public class DatabaseManager {
             stmt.execute(createEntrepotTable);
             System.out.println("Table 'Entrepot' créée.");
 
-            // Table ReservoirEau (hérite de Stockage)
             String createReservoirEauTable = """
                 CREATE TABLE IF NOT EXISTS ReservoirEau (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -187,7 +156,6 @@ public class DatabaseManager {
             stmt.execute(createReservoirEauTable);
             System.out.println("Table 'ReservoirEau' créée.");
 
-            // Table des articles stockés
             String createArticlesStockageTable = """
                 CREATE TABLE IF NOT EXISTS ArticlesStockage (
                     stockage_id INTEGER NOT NULL,
@@ -200,7 +168,6 @@ public class DatabaseManager {
             stmt.execute(createArticlesStockageTable);
             System.out.println("Table 'ArticlesStockage' créée.");
 
-            // Table Champ
             String createChampTable = """
                 CREATE TABLE IF NOT EXISTS Champ (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -217,7 +184,6 @@ public class DatabaseManager {
             stmt.execute(createChampTable);
             System.out.println("Table 'Champ' créée.");
 
-            // Table FermeAnimale
             String createFermeAnimaleTable = """
                 CREATE TABLE IF NOT EXISTS FermeAnimale (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -230,7 +196,6 @@ public class DatabaseManager {
             stmt.execute(createFermeAnimaleTable);
             System.out.println("Table 'FermeAnimale' créée.");
 
-            // Table Animal
             String createAnimalTable = """
                 CREATE TABLE IF NOT EXISTS Animal (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -245,7 +210,6 @@ public class DatabaseManager {
             stmt.execute(createAnimalTable);
             System.out.println("Table 'Animal' créée.");
 
-            // Table GestionnaireEquipement
             String createGestionnaireEquipementTable = """
                 CREATE TABLE IF NOT EXISTS GestionnaireEquipement (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -256,7 +220,6 @@ public class DatabaseManager {
             stmt.execute(createGestionnaireEquipementTable);
             System.out.println("Table 'GestionnaireEquipement' créée.");
 
-            // Table Equipement
             String createEquipementTable = """
                 CREATE TABLE IF NOT EXISTS Equipement (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -269,7 +232,6 @@ public class DatabaseManager {
             stmt.execute(createEquipementTable);
             System.out.println("Table 'Equipement' créée.");
 
-            // Table abstraite StructureProduction (classe mère)
             String createStructureProductionTable = """
                 CREATE TABLE IF NOT EXISTS StructureProduction (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -285,7 +247,6 @@ public class DatabaseManager {
             stmt.execute(createStructureProductionTable);
             System.out.println("Table 'StructureProduction' créée.");
 
-            // Table Usine (hérite de StructureProduction)
             String createUsineTable = """
                 CREATE TABLE IF NOT EXISTS Usine (
                     structure_id INTEGER PRIMARY KEY,
@@ -295,7 +256,6 @@ public class DatabaseManager {
             stmt.execute(createUsineTable);
             System.out.println("Table 'Usine' créée.");
 
-            // Table Serre (hérite de StructureProduction)
             String createSerreTable = """
                 CREATE TABLE IF NOT EXISTS Serre (
                     structure_id INTEGER PRIMARY KEY,
@@ -306,7 +266,6 @@ public class DatabaseManager {
             stmt.execute(createSerreTable);
             System.out.println("Table 'Serre' créée.");
 
-            // Table Economie
             String createEconomieTable = """
                 CREATE TABLE IF NOT EXISTS Economie (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -317,8 +276,6 @@ public class DatabaseManager {
             stmt.execute(createEconomieTable);
             System.out.println("Table 'Economie' créée.");
 
-            // Tables du catalogue (données statiques)
-            // Table CultureInfo
             String createCultureInfoTable = """
                 CREATE TABLE IF NOT EXISTS CultureInfo (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -334,7 +291,6 @@ public class DatabaseManager {
             stmt.execute(createCultureInfoTable);
             System.out.println("Table 'CultureInfo' créée.");
 
-            // Table AnimalInfo
             String createAnimalInfoTable = """
                 CREATE TABLE IF NOT EXISTS AnimalInfo (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -350,7 +306,6 @@ public class DatabaseManager {
             stmt.execute(createAnimalInfoTable);
             System.out.println("Table 'AnimalInfo' créée.");
 
-            // Table UsineInfo
             String createUsineInfoTable = """
                 CREATE TABLE IF NOT EXISTS UsineInfo (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -365,7 +320,6 @@ public class DatabaseManager {
             stmt.execute(createUsineInfoTable);
             System.out.println("Table 'UsineInfo' créée.");
 
-            // Table EquipementInfo
             String createEquipementInfoTable = """
                 CREATE TABLE IF NOT EXISTS EquipementInfo (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -378,7 +332,6 @@ public class DatabaseManager {
             stmt.execute(createEquipementInfoTable);
             System.out.println("Table 'EquipementInfo' créée.");
 
-            // Table ArticleInfo
             String createArticleInfoTable = """
                 CREATE TABLE IF NOT EXISTS ArticleInfo (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -390,7 +343,6 @@ public class DatabaseManager {
             stmt.execute(createArticleInfoTable);
             System.out.println("Table 'ArticleInfo' créée.");
 
-            // Table Sauvegarde
             String createSauvegardeTable = """
                 CREATE TABLE IF NOT EXISTS Sauvegarde (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,

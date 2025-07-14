@@ -1,4 +1,3 @@
-// Config.java
 package dev.linnaelle.fs.model;
 
 /**

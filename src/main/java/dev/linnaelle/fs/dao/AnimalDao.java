@@ -21,7 +21,7 @@ public class AnimalDao {
         String sql = "INSERT INTO Animal (ferme_animale_id, type, stock_herbe, vivant, deficit) VALUES (?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseManager.get();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, animal.getFermeAnimaleId());
             stmt.setString(2, animal.getType());
@@ -32,11 +32,12 @@ public class AnimalDao {
             int affectedRows = stmt.executeUpdate();
             
             if (affectedRows > 0) {
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    animal.setId(generatedKeys.getInt(1));
+                try (Statement lastIdStmt = conn.createStatement();
+                    ResultSet rs = lastIdStmt.executeQuery("SELECT last_insert_rowid()")) {
+                    if (rs.next()) {
+                        animal.setId(rs.getInt(1));
+                    }
                 }
-                return animal;
             }
             
         } catch (SQLException e) {

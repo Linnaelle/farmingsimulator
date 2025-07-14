@@ -19,36 +19,40 @@ public class StockageDao {
         try (Connection conn = DatabaseManager.get()) {
             conn.setAutoCommit(false);
             
-            try (PreparedStatement stmtStockage = conn.prepareStatement(sqlStockage, Statement.RETURN_GENERATED_KEYS);
+            try (PreparedStatement stmtStockage = conn.prepareStatement(sqlStockage);
                  PreparedStatement stmtStock = conn.prepareStatement(sqlStockPrincipal)) {
                 
-                // Insérer dans Stockage
+                
                 stmtStockage.setInt(1, stock.getFermeId());
                 stmtStockage.setInt(2, stock.getCapaciteMax());
                 stmtStockage.executeUpdate();
                 
-                ResultSet generatedKeys = stmtStockage.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    int stockageId = generatedKeys.getInt(1);
-                    stock.setId(stockageId);
-                    
-                    // Insérer dans StockPrincipal
+                int stockageId = 0;
+                try (Statement lastIdStmt = conn.createStatement();
+                    ResultSet rs = lastIdStmt.executeQuery("SELECT last_insert_rowid()")) {
+                    if (rs.next()) {
+                        stockageId = rs.getInt(1);
+                        stock.setId(stockageId);
+                    }
+                }
+
+                if(stockageId > 0) {
                     stmtStock.setInt(1, stockageId);
                     stmtStock.executeUpdate();
                     
                     conn.commit();
                     return stock;
+                } else {
+                    conn.rollback();
+                    System.err.println("[ERROR] Erreur lors de la sauvegarde du StockPrincipal: ID non généré.");
                 }
-                
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
             }
-            
         } catch (SQLException e) {
             System.err.println("[ERROR] Erreur lors de la sauvegarde du StockPrincipal: " + e.getMessage());
         }
-        
         return null;
     }
 
@@ -64,30 +68,33 @@ public class StockageDao {
         try (Connection conn = DatabaseManager.get()) {
             conn.setAutoCommit(false);
             
-            try (PreparedStatement stmtStockage = conn.prepareStatement(sqlStockage, Statement.RETURN_GENERATED_KEYS);
+            try (PreparedStatement stmtStockage = conn.prepareStatement(sqlStockage);
                  PreparedStatement stmtEntrepot = conn.prepareStatement(sqlEntrepot)) {
                 
                 stmtStockage.setInt(1, entrepot.getFermeId());
                 stmtStockage.setInt(2, entrepot.getCapaciteMax());
                 stmtStockage.executeUpdate();
                 
-                ResultSet generatedKeys = stmtStockage.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    int stockageId = generatedKeys.getInt(1);
-                    entrepot.setId(stockageId);
+                int stockageId = 0;
+                try (Statement lastIdStmt = conn.createStatement();
+                    ResultSet rs = lastIdStmt.executeQuery("SELECT last_insert_rowid()")) {
                     
+                    if (rs.next()) {
+                        stockageId = rs.getInt(1);
+                        entrepot.setId(stockageId);
+                    }
+                }
+                if (stockageId > 0) {
                     stmtEntrepot.setInt(1, stockageId);
                     stmtEntrepot.executeUpdate();
                     
                     conn.commit();
                     return entrepot;
                 }
-                
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
             }
-            
         } catch (SQLException e) {
             System.err.println("[ERROR] Erreur lors de la sauvegarde de l'Entrepot: " + e.getMessage());
         }
@@ -120,7 +127,7 @@ public class StockageDao {
                 stock.setFermeId(rs.getInt("ferme_id"));
                 stock.setCapaciteMax(rs.getInt("capacite_max"));
                 
-                // Charger les articles
+                
                 stock.setArticles(loadArticles(stock.getId()));
                 
                 return stock;
@@ -224,11 +231,11 @@ public class StockageDao {
             try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
                  PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                 
-                // Supprimer les anciens articles
+                
                 deleteStmt.setInt(1, stockageId);
                 deleteStmt.executeUpdate();
                 
-                // Insérer les nouveaux articles
+                
                 for (Map.Entry<String, Integer> entry : articles.entrySet()) {
                     if (entry.getValue() > 0) {
                         insertStmt.setInt(1, stockageId);

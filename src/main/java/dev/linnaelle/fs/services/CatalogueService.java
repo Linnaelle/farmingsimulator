@@ -12,14 +12,12 @@ public class CatalogueService {
     
     private static CatalogueService instance;
     
-    // Cache pour éviter les accès répétés à la base
     private Map<String, CultureInfo> cultureCache;
     private Map<String, AnimalInfo> animalCache;
     private Map<String, UsineInfo> usineCache;
     private Map<String, EquipementInfo> equipementCache;
     private Map<String, ArticleInfo> articleCache;
     
-    // DAO pour accès aux données
     private CatalogueDao catalogueDao;
     
     private CatalogueService() {
@@ -30,7 +28,6 @@ public class CatalogueService {
         this.equipementCache = new HashMap<>();
         this.articleCache = new HashMap<>();
         
-        // Chargement initial du cache
         loadCache();
     }
     
@@ -41,8 +38,11 @@ public class CatalogueService {
         return instance;
     }
     
-    // === MÉTHODES PRINCIPALES ===
-    
+    /**
+     * Récupérer les informations sur une culture par son type
+     * @param type Le type de culture
+     * @return Les informations sur la culture, ou null si non trouvées
+     */
     public CultureInfo getCultureInfo(String type) {
         if (type == null || type.trim().isEmpty()) {
             return null;
@@ -52,6 +52,11 @@ public class CatalogueService {
             key -> catalogueDao.getCultureInfo(key));
     }
     
+    /**
+     * Récupérer les informations sur un animal par son type
+     * @param type Le type d'animal
+     * @return Les informations sur l'animal, ou null si non trouvées
+     */
     public AnimalInfo getAnimalInfo(String type) {
         if (type == null || type.trim().isEmpty()) {
             return null;
@@ -61,6 +66,11 @@ public class CatalogueService {
             key -> catalogueDao.getAnimalInfo(key));
     }
     
+    /**
+     * Récupérer les informations sur une usine par son type
+     * @param type Le type d'usine
+     * @return Les informations sur l'usine, ou null si non trouvées
+     */
     public UsineInfo getUsineInfo(String type) {
         if (type == null || type.trim().isEmpty()) {
             return null;
@@ -70,6 +80,11 @@ public class CatalogueService {
             key -> catalogueDao.getUsineInfo(key));
     }
     
+    /**
+     * Récupérer les informations sur un équipement par son type
+     * @param type Le type d'équipement
+     * @return Les informations sur l'équipement, ou null si non trouvées
+     */
     public EquipementInfo getEquipementInfo(String type) {
         if (type == null || type.trim().isEmpty()) {
             return null;
@@ -79,6 +94,11 @@ public class CatalogueService {
             key -> catalogueDao.getEquipementInfo(key));
     }
     
+    /**
+     * Récupérer les informations sur un article par son nom
+     * @param nom Le nom de l'article
+     * @return Les informations sur l'article, ou null si non trouvées
+     */
     public ArticleInfo getArticleInfo(String nom) {
         if (nom == null || nom.trim().isEmpty()) {
             return null;
@@ -87,8 +107,6 @@ public class CatalogueService {
         return articleCache.computeIfAbsent(nom.toLowerCase(), 
             key -> catalogueDao.getArticleInfo(key));
     }
-    
-    // === MÉTHODES UTILITAIRES ===
     
     public List<String> getAllCultureTypes() {
         return catalogueDao.getAllCultureTypes();
@@ -110,8 +128,6 @@ public class CatalogueService {
         return catalogueDao.getArticlesByCategorie(categorie);
     }
     
-    // === MÉTHODES DE VALIDATION ===
-    
     public boolean isCultureValid(String type) {
         return getCultureInfo(type) != null;
     }
@@ -132,22 +148,34 @@ public class CatalogueService {
         return getArticleInfo(nom) != null;
     }
     
-    // === MÉTHODES MÉTIER ===
-    
+    /**
+     * Vérifier si une culture nécessite du travail
+     * @param typeCulture Le type de culture
+     * @return true si la culture nécessite du travail, false sinon
+     */
     public boolean cultureNeedLabour(String typeCulture) {
         CultureInfo info = getCultureInfo(typeCulture);
         return info != null && info.isNeedLabour();
     }
     
+    /**
+     * Récupérer les équipements requis pour une culture
+     * @param typeCulture Le type de culture
+     * @return La liste des équipements requis, ou une liste vide si aucun équipement n'est requis
+     */
     public List<String> getEquipementsRequiredForCulture(String typeCulture) {
         CultureInfo info = getCultureInfo(typeCulture);
         return info != null ? info.getEquipements() : new ArrayList<>();
     }
     
+    /**
+     * Récupérer les intrants requis pour une usine
+     * @param typeUsine Le type d'usine
+     * @return Un map des articles et quantités requis, ou une map vide si aucun intrant n'est requis
+     */
     public Map<String, Integer> getUsineIntrants(String typeUsine) {
         UsineInfo info = getUsineInfo(typeUsine);
         if (info != null && info.getIntrantsRequis() != null) {
-            // Parse la chaîne "article1:quantite1,article2:quantite2"
             Map<String, Integer> intrants = new HashMap<>();
             String[] pairs = info.getIntrantsRequis().split(",");
             for (String pair : pairs) {
@@ -165,60 +193,78 @@ public class CatalogueService {
         return new HashMap<>();
     }
     
+    /**
+     * Récupérer les articles produits par une usine
+     * @param typeUsine Le type d'usine
+     * @return La liste des articles produits, ou une liste vide si aucun article n'est produit
+     */
     public String getUsineArticleProduit(String typeUsine) {
         UsineInfo info = getUsineInfo(typeUsine);
         return info != null ? info.getArticleProduit() : null;
     }
     
+    /**
+     * Récupérer le multiplicateur de production d'une usine
+     * @param typeUsine Le type d'usine
+     * @return Le multiplicateur de production, ou 1.0 si non spécifié
+     */
     public double getUsineMultiplicateur(String typeUsine) {
         UsineInfo info = getUsineInfo(typeUsine);
         return info != null ? info.getMultiplicateur() : 1.0;
     }
     
+    /**
+     * Récupérer la consommation d'eau d'un animal
+     * @param typeAnimal Le type d'animal
+     * @return La consommation d'eau en litres, ou 0 si non spécifié
+     */
     public int getAnimalConsoEau(String typeAnimal) {
         AnimalInfo info = getAnimalInfo(typeAnimal);
         return info != null ? info.getConsoEau() : 0;
     }
     
+    /**
+     * Récupérer la consommation de nourriture d'un animal
+     * @param typeAnimal Le type d'animal
+     * @return La consommation de nourriture en kg, ou 0 si non spécifié
+     */
     public int getAnimalConsoHerbe(String typeAnimal) {
         AnimalInfo info = getAnimalInfo(typeAnimal);
         return info != null ? info.getConsoHerbe() : 0;
     }
     
+    /**
+     * Récupérer les articles produits par un animal
+     * @param typeAnimal Le type d'animal
+     * @return La liste des articles produits, ou une liste vide si aucun article n'est produit
+     */
     public List<String> getAnimalArticlesProduits(String typeAnimal) {
         AnimalInfo info = getAnimalInfo(typeAnimal);
         return info != null ? info.getArticlesProduits() : new ArrayList<>();
     }
     
-    // === GESTION DU CACHE ===
-    
     private void loadCache() {
         try {
-            // Chargement des cultures
             List<CultureInfo> cultures = catalogueDao.getAllCultures();
             for (CultureInfo culture : cultures) {
                 cultureCache.put(culture.getNom().toLowerCase(), culture);
             }
             
-            // Chargement des animaux
             List<AnimalInfo> animaux = catalogueDao.getAllAnimaux();
             for (AnimalInfo animal : animaux) {
                 animalCache.put(animal.getNom().toLowerCase(), animal);
             }
             
-            // Chargement des usines
             List<UsineInfo> usines = catalogueDao.getAllUsines();
             for (UsineInfo usine : usines) {
                 usineCache.put(usine.getNom().toLowerCase(), usine);
             }
             
-            // Chargement des équipements
             List<EquipementInfo> equipements = catalogueDao.getAllEquipements();
             for (EquipementInfo equipement : equipements) {
                 equipementCache.put(equipement.getNom().toLowerCase(), equipement);
             }
             
-            // Chargement des articles
             List<ArticleInfo> articles = catalogueDao.getAllArticles();
             for (ArticleInfo article : articles) {
                 articleCache.put(article.getNom().toLowerCase(), article);
@@ -248,8 +294,6 @@ public class CatalogueService {
         equipementCache.clear();
         articleCache.clear();
     }
-    
-    // === MÉTHODES DE DEBUG ===
     
     public void printCacheStats() {
         System.out.println("=== STATISTIQUES DU CATALOGUE ===");
